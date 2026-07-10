@@ -89,7 +89,14 @@ export function parseAppBackup(raw: string): BackupParseResult {
   if (!isRecord(value) || value.version !== 1) {
     return { ok: false, error: '不支持这个备份版本' }
   }
-  if (typeof value.exportedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value.exportedAt)) {
+  const exportedDate = typeof value.exportedAt === 'string'
+    ? new Date(value.exportedAt)
+    : null
+  if (
+    !exportedDate ||
+    Number.isNaN(exportedDate.getTime()) ||
+    exportedDate.toISOString() !== value.exportedAt
+  ) {
     return { ok: false, error: '备份时间格式不正确' }
   }
 

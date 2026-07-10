@@ -181,7 +181,7 @@ export const useMenuStore = defineStore('menu', () => {
   }
 
   const restoreBackup = (backup: AppBackupV1) => {
-    ensureInitialized()
+    refreshDate()
     const nextRules = {
       likedIds: new Set(backup.preferences.likedIds),
       dislikedIds: new Set(backup.preferences.dislikedIds),

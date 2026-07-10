@@ -102,5 +102,11 @@ describe('本地数据备份', () => {
       ok: false,
       error: '备份时间格式不正确',
     })
+
+    backup.exportedAt = '2026-99-99T99:99:99.999Z'
+    expect(parseAppBackup(JSON.stringify(backup))).toEqual({
+      ok: false,
+      error: '备份时间格式不正确',
+    })
   })
 })

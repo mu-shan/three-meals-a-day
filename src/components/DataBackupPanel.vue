@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import {
   createAppBackup,
   createBackupFilename,
@@ -15,6 +15,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   restore: [backup: AppBackupV1]
+  'before-export': []
 }>()
 
 const pendingBackup = ref<AppBackupV1 | null>(null)
@@ -32,9 +33,11 @@ const previewDate = computed(() => {
   }).format(new Date(pendingBackup.value.exportedAt))
 })
 
-const exportBackup = () => {
+const exportBackup = async () => {
   importError.value = ''
   try {
+    emit('before-export')
+    await nextTick()
     const backup = createAppBackup(props.menu, props.preferences)
     const blob = new Blob([serializeAppBackup(backup)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)

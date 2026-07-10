@@ -87,6 +87,7 @@ const restoreBackup = (backup: AppBackupV1) => {
         likedIds: preferences.likedIds,
         dislikedIds: preferences.dislikedIds,
       }"
+      @before-export="menuStore.refreshDate()"
       @restore="restoreBackup"
     />
   </main>

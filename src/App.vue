@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
 import { RouterView } from 'vue-router'
 import AppNavigation from './components/AppNavigation.vue'
 import { useMenuStore } from './stores/menu'
@@ -6,6 +7,21 @@ import { usePreferencesStore } from './stores/preferences'
 
 const menuStore = useMenuStore()
 const preferences = usePreferencesStore()
+
+const refreshDate = () => menuStore.refreshDate()
+const refreshWhenVisible = () => {
+  if (document.visibilityState === 'visible') refreshDate()
+}
+
+onMounted(() => {
+  window.addEventListener('focus', refreshDate)
+  document.addEventListener('visibilitychange', refreshWhenVisible)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', refreshDate)
+  document.removeEventListener('visibilitychange', refreshWhenVisible)
+})
 </script>
 
 <template>
