@@ -1,15 +1,13 @@
 import { dishes } from '../data/dishes'
+import { validateDailyMenu } from '../domain/menuValidation'
 import type {
   AppBackupV1,
   BackupParseResult,
   DailyMenu,
   DishPreferences,
-  Meal,
-  MealType,
 } from '../types/menu'
 
 const dishById = new Map(dishes.map((dish) => [dish.id, dish]))
-const mealTypes: MealType[] = ['breakfast', 'lunch', 'dinner']
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   Boolean(value) && typeof value === 'object' && !Array.isArray(value)
@@ -80,58 +78,6 @@ const parsePreferences = (
   }
 }
 
-const parseMeal = (
-  value: unknown,
-  type: MealType,
-): { ok: true; meal: Meal } | { ok: false; error: string } => {
-  if (!isRecord(value) || value.type !== type || !Array.isArray(value.dishes)) {
-    return { ok: false, error: `${type}餐次格式不正确` }
-  }
-  if (value.dishes.length === 0) {
-    return { ok: false, error: `${type}餐次不能为空` }
-  }
-
-  const parsedDishes = []
-  for (const item of value.dishes) {
-    if (!isRecord(item) || typeof item.id !== 'string') {
-      return { ok: false, error: `${type}包含无效菜品` }
-    }
-    const sourceDish = dishById.get(item.id)
-    if (
-      !sourceDish ||
-      !sourceDish.meals.includes(type) ||
-      item.role !== sourceDish.role ||
-      item.kind !== sourceDish.kind
-    ) {
-      return { ok: false, error: `${type}包含不存在或不匹配的菜品` }
-    }
-    parsedDishes.push(sourceDish)
-  }
-
-  return { ok: true, meal: { type, dishes: parsedDishes } }
-}
-
-const parseMenu = (
-  value: unknown,
-): { ok: true; menu: DailyMenu } | { ok: false; error: string } => {
-  if (
-    !isRecord(value) ||
-    typeof value.date !== 'string' ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(value.date)
-  ) {
-    return { ok: false, error: '菜单日期格式不正确' }
-  }
-
-  const meals = {} as Record<MealType, Meal>
-  for (const type of mealTypes) {
-    const parsed = parseMeal(value[type], type)
-    if (!parsed.ok) return parsed
-    meals[type] = parsed.meal
-  }
-
-  return { ok: true, menu: { date: value.date, ...meals } }
-}
-
 export function parseAppBackup(raw: string): BackupParseResult {
   let value: unknown
   try {
@@ -143,24 +89,27 @@ export function parseAppBackup(raw: string): BackupParseResult {
   if (!isRecord(value) || value.version !== 1) {
     return { ok: false, error: '不支持这个备份版本' }
   }
-  if (
-    typeof value.exportedAt !== 'string' ||
-    Number.isNaN(Date.parse(value.exportedAt))
-  ) {
+  if (typeof value.exportedAt !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value.exportedAt)) {
     return { ok: false, error: '备份时间格式不正确' }
   }
 
-  const parsedMenu = parseMenu(value.menu)
-  if (!parsedMenu.ok) return parsedMenu
+  const parsedMenu = validateDailyMenu(value.menu)
+  if (!parsedMenu) return { ok: false, error: '备份菜单结构不正确' }
   const parsedPreferences = parsePreferences(value.preferences)
   if (!parsedPreferences.ok) return parsedPreferences
+  const disliked = new Set(parsedPreferences.preferences.dislikedIds)
+  const menuIds = [parsedMenu.breakfast, parsedMenu.lunch, parsedMenu.dinner]
+    .flatMap((meal) => meal.dishes.map((dish) => dish.id))
+  if (menuIds.some((id) => disliked.has(id))) {
+    return { ok: false, error: '备份菜单中包含已标记不喜欢的菜' }
+  }
 
   return {
     ok: true,
     backup: {
       version: 1,
       exportedAt: value.exportedAt,
-      menu: parsedMenu.menu,
+      menu: parsedMenu,
       preferences: parsedPreferences.preferences,
     },
   }

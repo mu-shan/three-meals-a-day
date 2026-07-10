@@ -28,13 +28,7 @@ const restoreDish = (dishId: string) => {
 }
 
 const restoreBackup = (backup: AppBackupV1) => {
-  preferences.replacePreferences(backup.preferences)
-  if (backup.menu.date === menuStore.today) {
-    menuStore.replaceImportedMenu(backup.menu)
-  } else {
-    menuStore.regenerateToday()
-  }
-  menuStore.notify('备份已恢复')
+  menuStore.restoreBackup(backup)
 }
 </script>
 
@@ -60,11 +54,10 @@ const restoreBackup = (backup: AppBackupV1) => {
         <h2 id="preferences-book-title">喜欢 / 不喜欢</h2>
       </div>
 
-      <div class="preferences-book__tabs" role="tablist" aria-label="口味偏好分类">
+      <div class="preferences-book__tabs" aria-label="口味偏好分类">
         <button
           type="button"
-          role="tab"
-          :aria-selected="activeTab === 'liked'"
+          :aria-pressed="activeTab === 'liked'"
           :class="{ 'is-active': activeTab === 'liked' }"
           @click="activeTab = 'liked'"
         >
@@ -73,8 +66,7 @@ const restoreBackup = (backup: AppBackupV1) => {
         <button
           data-testid="disliked-tab"
           type="button"
-          role="tab"
-          :aria-selected="activeTab === 'disliked'"
+          :aria-pressed="activeTab === 'disliked'"
           :class="{ 'is-active': activeTab === 'disliked' }"
           @click="activeTab = 'disliked'"
         >

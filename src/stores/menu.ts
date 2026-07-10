@@ -14,7 +14,7 @@ import {
   loadTodayMenu,
   saveTodayMenu,
 } from '../services/todayMenuStorage'
-import type { DailyMenu, MealType, ShoppingListData } from '../types/menu'
+import type { AppBackupV1, DailyMenu, MealType, ShoppingListData } from '../types/menu'
 import { usePreferencesStore } from './preferences'
 
 type MenuStorage = Pick<Storage, 'getItem' | 'setItem'>
@@ -95,8 +95,13 @@ export const useMenuStore = defineStore('menu', () => {
     if (!initialized.value) initialize()
   }
 
+  const refreshDate = (date: Date = new Date()) => {
+    const nextDate = formatLocalDate(date)
+    if (!initialized.value || nextDate !== today.value) initialize(date, storage ?? window.localStorage)
+  }
+
   const shuffle = (createMenu: () => DailyMenu) => {
-    ensureInitialized()
+    refreshDate()
     if (isShuffling.value) return false
 
     isShuffling.value = true
@@ -146,7 +151,7 @@ export const useMenuStore = defineStore('menu', () => {
   }
 
   const dislikeDish = (type: MealType, dishId: string) => {
-    ensureInitialized()
+    refreshDate()
     if (isShuffling.value) return false
 
     const nextRules = {
@@ -175,6 +180,26 @@ export const useMenuStore = defineStore('menu', () => {
     persist(generateDailyMenu(today.value, preferences.rules))
   }
 
+  const restoreBackup = (backup: AppBackupV1) => {
+    ensureInitialized()
+    const nextRules = {
+      likedIds: new Set(backup.preferences.likedIds),
+      dislikedIds: new Set(backup.preferences.dislikedIds),
+    }
+    try {
+      const nextMenu = backup.menu.date === today.value
+        ? reconcileDailyMenu(backup.menu, nextRules)
+        : generateDailyMenu(today.value, nextRules)
+      preferences.replacePreferences(backup.preferences)
+      persist(nextMenu)
+      notify('备份已恢复')
+      return true
+    } catch {
+      notify('备份中的偏好无法生成完整菜单，未覆盖当前数据')
+      return false
+    }
+  }
+
   return {
     menu,
     today,
@@ -183,6 +208,7 @@ export const useMenuStore = defineStore('menu', () => {
     initialized,
     shoppingList,
     initialize,
+    refreshDate,
     notify,
     clearFeedback,
     generateAll,
@@ -192,5 +218,6 @@ export const useMenuStore = defineStore('menu', () => {
     dislikeDish,
     replaceImportedMenu,
     regenerateToday,
+    restoreBackup,
   }
 })

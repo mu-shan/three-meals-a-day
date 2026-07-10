@@ -1,4 +1,5 @@
 import type { DailyMenu } from '../types/menu'
+import { validateDailyMenu } from '../domain/menuValidation'
 
 const STORAGE_KEY = 'family-meal-picker:today'
 
@@ -17,8 +18,8 @@ export function loadTodayMenu(storage: ReadStorage, date: string): DailyMenu | n
     const raw = storage.getItem(STORAGE_KEY)
     if (!raw) return null
 
-    const menu = JSON.parse(raw) as DailyMenu
-    return menu.date === date ? menu : null
+    const menu = validateDailyMenu(JSON.parse(raw))
+    return menu?.date === date ? menu : null
   } catch {
     return null
   }

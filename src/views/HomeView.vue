@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onBeforeUnmount, onMounted } from 'vue'
 import { Loading } from 'animal-island-vue'
 import { useRouter } from 'vue-router'
 import FamilyHero from '../components/FamilyHero.vue'
@@ -12,6 +13,21 @@ const menuStore = useMenuStore()
 const preferences = usePreferencesStore()
 
 menuStore.initialize()
+
+const refreshDate = () => menuStore.refreshDate()
+const refreshWhenVisible = () => {
+  if (document.visibilityState === 'visible') refreshDate()
+}
+
+onMounted(() => {
+  window.addEventListener('focus', refreshDate)
+  document.addEventListener('visibilitychange', refreshWhenVisible)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('focus', refreshDate)
+  document.removeEventListener('visibilitychange', refreshWhenVisible)
+})
 </script>
 
 <template>

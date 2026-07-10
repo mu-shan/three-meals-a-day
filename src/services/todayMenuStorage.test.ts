@@ -30,6 +30,13 @@ describe('当天菜单存储', () => {
     expect(loadTodayMenu(storage, '2026-07-11')).toBeNull()
   })
 
+  it('损坏或不符合业务结构的当天菜单不会被恢复', () => {
+    const storage = new MemoryStorage()
+    storage.setItem('unused', JSON.stringify({ date: '2026-07-10', lunch: {} }))
+
+    expect(loadTodayMenu(storage, '2026-07-10')).toBeNull()
+  })
+
   it('存储抛错时静默降级', () => {
     const brokenStorage = {
       getItem: () => {

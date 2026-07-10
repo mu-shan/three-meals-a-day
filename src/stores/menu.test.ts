@@ -6,6 +6,7 @@ import { generateDailyMenu } from '../domain/menuGenerator'
 import { saveTodayMenu } from '../services/todayMenuStorage'
 import { useMenuStore } from './menu'
 import { usePreferencesStore } from './preferences'
+import { createAppBackup } from '../services/appBackup'
 
 const testDate = new Date(2026, 6, 10, 8, 30)
 
@@ -81,5 +82,41 @@ describe('当天菜单 store', () => {
     expect(store.menu).not.toBeNull()
     expect(usePreferencesStore().dislikedIds).toEqual([])
     expect(store.feedback).toContain('恢复')
+  })
+
+  it('跨日检查会切换为当天菜单', () => {
+    const store = useMenuStore()
+    store.initialize(testDate)
+
+    store.refreshDate(new Date(2026, 6, 11, 8, 0))
+
+    expect(store.today).toBe('2026-07-11')
+    expect(store.menu?.date).toBe('2026-07-11')
+  })
+
+  it('导入恢复失败时不覆盖当前菜单与偏好', () => {
+    const store = useMenuStore()
+    store.initialize(testDate)
+    const preferences = usePreferencesStore()
+    preferences.toggleLike('tomato-eggs')
+    const originalMenu = store.menu
+    const backup = createAppBackup(generateDailyMenu('2026-07-09'), {
+      likedIds: [],
+      dislikedIds: [
+        'millet-porridge',
+        'pumpkin-porridge',
+        'oatmeal',
+        'steamed-bun',
+        'boiled-corn',
+        'steamed-sweet-potato',
+        'egg-pancake',
+        'toast',
+      ],
+    })
+
+    expect(store.restoreBackup(backup)).toBe(false)
+    expect(store.menu).toEqual(originalMenu)
+    expect(preferences.likedIds).toEqual(['tomato-eggs'])
+    expect(preferences.dislikedIds).toEqual([])
   })
 })

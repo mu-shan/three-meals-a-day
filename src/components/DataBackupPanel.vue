@@ -33,14 +33,24 @@ const previewDate = computed(() => {
 })
 
 const exportBackup = () => {
-  const backup = createAppBackup(props.menu, props.preferences)
-  const blob = new Blob([serializeAppBackup(backup)], { type: 'application/json' })
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = createBackupFilename(props.menu.date)
-  link.click()
-  URL.revokeObjectURL(url)
+  importError.value = ''
+  try {
+    const backup = createAppBackup(props.menu, props.preferences)
+    const blob = new Blob([serializeAppBackup(backup)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = createBackupFilename(props.menu.date)
+    link.hidden = true
+    document.body.append(link)
+    link.click()
+    window.setTimeout(() => {
+      link.remove()
+      URL.revokeObjectURL(url)
+    }, 1000)
+  } catch {
+    importError.value = '导出失败，请稍后重试'
+  }
 }
 
 const chooseBackup = () => fileInput.value?.click()
