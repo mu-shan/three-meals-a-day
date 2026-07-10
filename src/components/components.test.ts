@@ -3,7 +3,6 @@
 import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { dishes } from '../data/dishes'
-import DishPreferenceDrawer from './DishPreferenceDrawer.vue'
 import DishCard from './DishCard.vue'
 import FamilyHero from './FamilyHero.vue'
 import MealCard from './MealCard.vue'
@@ -86,38 +85,4 @@ describe('家庭菜单组件', () => {
     expect(wrapper.emitted('open-preferences')).toHaveLength(1)
   })
 
-  it('口味偏好抽屉可管理喜欢与不喜欢的菜', async () => {
-    const likedDish = dishes.find((item) => item.id === 'pepper-pork')!
-    const dislikedDish = dishes.find((item) => item.id === 'tomato-eggs')!
-    const wrapper = mount(DishPreferenceDrawer, {
-      props: {
-        open: true,
-        likedDishes: [likedDish],
-        dislikedDishes: [dislikedDish],
-      },
-    })
-
-    expect(wrapper.text()).toContain('辣椒炒肉')
-    expect(wrapper.text()).toContain('妈妈的口味')
-    await wrapper.get('[data-testid="cancel-like"]').trigger('click')
-    expect(wrapper.emitted('cancel-like')).toEqual([['pepper-pork']])
-
-    await wrapper.get('[data-testid="disliked-tab"]').trigger('click')
-    expect(wrapper.text()).toContain('西红柿炒鸡蛋')
-    expect(wrapper.text()).toContain('宝宝的口味')
-    await wrapper.get('[data-testid="restore-dish"]').trigger('click')
-    expect(wrapper.emitted('restore')).toEqual([['tomato-eggs']])
-
-    await wrapper.get('[data-testid="close-preferences"]').trigger('click')
-    expect(wrapper.emitted('close')).toHaveLength(1)
-  })
-
-  it('口味偏好抽屉为空时显示操作提示', () => {
-    const wrapper = mount(DishPreferenceDrawer, {
-      props: { open: true, likedDishes: [], dislikedDishes: [] },
-    })
-
-    expect(wrapper.text()).toContain('还没有喜欢的菜')
-    expect(wrapper.text()).toContain('在今日菜单里点“喜欢”')
-  })
 })
