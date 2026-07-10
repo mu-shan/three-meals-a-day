@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import AppNavigation from './components/AppNavigation.vue'
 import { useMenuStore } from './stores/menu'
+import { usePreferencesStore } from './stores/preferences'
 
 const menuStore = useMenuStore()
+const preferences = usePreferencesStore()
 </script>
 
 <template>
@@ -14,6 +17,8 @@ const menuStore = useMenuStore()
     </div>
 
     <RouterView />
+
+    <AppNavigation :preference-count="preferences.preferenceCount" />
 
     <Transition name="preference-toast">
       <div v-if="menuStore.feedback" class="preference-toast" role="status">
