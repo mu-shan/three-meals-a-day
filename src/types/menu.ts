@@ -42,4 +42,15 @@ export interface DishPreferenceRules {
   dislikedIds: ReadonlySet<string>
 }
 
+export interface AppBackupV1 {
+  version: 1
+  exportedAt: string
+  menu: DailyMenu
+  preferences: DishPreferences
+}
+
+export type BackupParseResult =
+  | { ok: true; backup: AppBackupV1 }
+  | { ok: false; error: string }
+
 export type ShoppingListData = Record<IngredientCategory, string[]>
