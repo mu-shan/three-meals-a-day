@@ -15,6 +15,22 @@ const validStringIds = (value: unknown, validIds: ReadonlySet<string>): string[]
   ))]
 }
 
+export function normalizeDishPreferences(
+  value: unknown,
+  validIds: ReadonlySet<string>,
+): DishPreferences {
+  if (!value || typeof value !== 'object') return emptyPreferences()
+
+  const parsed = value as Record<string, unknown>
+  const dislikedIds = validStringIds(parsed.dislikedIds, validIds)
+  const dislikedSet = new Set(dislikedIds)
+  const likedIds = validStringIds(parsed.likedIds, validIds).filter(
+    (id) => !dislikedSet.has(id),
+  )
+
+  return { likedIds, dislikedIds }
+}
+
 export function loadDishPreferences(
   storage: ReadStorage,
   validIds: ReadonlySet<string>,
@@ -23,14 +39,7 @@ export function loadDishPreferences(
     const raw = storage.getItem(STORAGE_KEY)
     if (!raw) return emptyPreferences()
 
-    const parsed = JSON.parse(raw) as Record<string, unknown>
-    const dislikedIds = validStringIds(parsed.dislikedIds, validIds)
-    const dislikedSet = new Set(dislikedIds)
-    const likedIds = validStringIds(parsed.likedIds, validIds).filter(
-      (id) => !dislikedSet.has(id),
-    )
-
-    return { likedIds, dislikedIds }
+    return normalizeDishPreferences(JSON.parse(raw), validIds)
   } catch {
     return emptyPreferences()
   }
