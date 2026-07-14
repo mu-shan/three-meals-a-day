@@ -1,4 +1,4 @@
-import { defineComponent, h, ref, type PropType } from 'vue'
+import { defineComponent, h, ref, watch, type PropType } from 'vue'
 
 interface TabItem {
   key: string
@@ -94,36 +94,62 @@ export const Tabs = defineComponent({
       required: true,
     },
     modelValue: String,
+    defaultActiveKey: String,
   },
   emits: ['update:modelValue', 'change'],
-  setup(props, { emit }) {
+  setup(props, { emit, slots }) {
+    const internalActiveKey = ref(props.defaultActiveKey ?? props.items[0]?.key)
+
+    watch(
+      () => props.items,
+      (items) => {
+        if (
+          props.modelValue === undefined &&
+          !items.some((item) => item.key === internalActiveKey.value)
+        ) {
+          internalActiveKey.value = items[0]?.key
+        }
+      },
+    )
+
     const selectTab = (key: string) => {
+      if (props.modelValue === undefined) {
+        internalActiveKey.value = key
+      }
+
       emit('update:modelValue', key)
       emit('change', key)
     }
 
-    return () =>
-      h(
-        'div',
-        { 'data-animal-component': 'tabs' },
-        props.items.map((item) =>
+    return () => {
+      const activeKey = props.modelValue ?? internalActiveKey.value
+      const activeItem = props.items.find((item) => item.key === activeKey)
+      const activeContent = activeItem
+        ? slots[activeItem.key]?.({ item: activeItem })
+        : undefined
+
+      return h('div', { 'data-animal-component': 'tabs' }, [
+        ...props.items.map((item) =>
           h(
             'button',
             {
               'data-tab-key': item.key,
-              'aria-pressed': props.modelValue === item.key,
+              'aria-pressed': activeKey === item.key,
               onClick: () => selectTab(item.key),
             },
             item.label,
           ),
         ),
-      )
+        ...(activeContent ?? []),
+      ])
+    }
   },
 })
 
 export const Collapse = defineComponent({
   props: {
     question: String,
+    answer: String,
     defaultExpanded: {
       type: Boolean,
       default: false,
@@ -132,12 +158,20 @@ export const Collapse = defineComponent({
       type: Boolean,
       default: undefined,
     },
+    disabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   emits: ['update:expanded', 'change'],
   setup(props, { emit, slots }) {
     const internalExpanded = ref(props.defaultExpanded)
 
     const toggle = () => {
+      if (props.disabled) {
+        return
+      }
+
       const nextExpanded = !(props.expanded ?? internalExpanded.value)
 
       if (props.expanded === undefined) {
@@ -157,12 +191,17 @@ export const Collapse = defineComponent({
           {
             'data-collapse-trigger': '',
             'aria-expanded': isExpanded,
+            disabled: props.disabled,
             onClick: toggle,
           },
-          props.question,
+          slots.question?.() ?? props.question,
         ),
         isExpanded
-          ? h('div', { 'data-collapse-content': '' }, slots.default?.())
+          ? h(
+              'div',
+              { 'data-collapse-content': '' },
+              slots.default?.() ?? props.answer,
+            )
           : null,
       ])
     }
