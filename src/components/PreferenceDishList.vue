@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button, Card } from 'animal-island-vue'
 import type { Dish } from '../types/menu'
 
 const props = defineProps<{
@@ -19,25 +20,28 @@ const preferenceOwner = (dish: Dish) => {
 
 <template>
   <div v-if="dishes.length" class="preference-list">
-    <article v-for="dish in dishes" :key="dish.id" class="preference-list__item">
-      <div class="preference-list__image">
-        <img :src="dish.image" :alt="dish.name" />
-      </div>
-      <div class="preference-list__copy">
-        <span>{{ preferenceOwner(dish) }}</span>
-        <h3>{{ dish.name }}</h3>
-        <p>{{ dish.ingredients.map((item) => item.name).join(' · ') }}</p>
-      </div>
-      <button
-        :data-testid="mode === 'liked' ? 'cancel-like' : 'restore-dish'"
-        class="preference-list__action"
-        :class="{ 'preference-list__action--restore': mode === 'disliked' }"
-        type="button"
-        @click="emit('action', dish.id)"
-      >
-        {{ mode === 'liked' ? '取消喜欢' : '重新加入' }}
-      </button>
-    </article>
+    <Card v-for="dish in dishes" :key="dish.id" color="default" pattern="none">
+      <article class="preference-list__item">
+        <div class="preference-list__image">
+          <img :src="dish.image" :alt="dish.name" />
+        </div>
+        <div class="preference-list__copy">
+          <span>{{ preferenceOwner(dish) }}</span>
+          <h3>{{ dish.name }}</h3>
+          <p>{{ dish.ingredients.map((item) => item.name).join(' · ') }}</p>
+        </div>
+        <Button
+          :data-testid="mode === 'liked' ? 'cancel-like' : 'restore-dish'"
+          class="preference-list__action"
+          :class="{ 'preference-list__action--restore': mode === 'disliked' }"
+          type="default"
+          size="small"
+          @click="emit('action', dish.id)"
+        >
+          {{ mode === 'liked' ? '取消喜欢' : '重新加入' }}
+        </Button>
+      </article>
+    </Card>
   </div>
 
   <div v-else class="preference-list__empty">

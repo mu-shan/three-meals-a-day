@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Button, Collapse, Divider, Title } from 'animal-island-vue'
 import { computed, nextTick, ref } from 'vue'
 import {
   createAppBackup,
@@ -88,59 +89,60 @@ const confirmImport = () => {
 
 <template>
   <section class="backup-panel" aria-labelledby="backup-panel-title">
-    <div class="backup-panel__heading">
-      <div>
-        <p>留一份安心</p>
-        <h2 id="backup-panel-title">数据备份</h2>
+    <Collapse data-testid="backup-collapse">
+      <template #question>
+        <div class="backup-panel__heading">
+          <div>
+            <p>留一份安心</p>
+            <Title id="backup-panel-title" size="middle" color="brown">数据备份与恢复</Title>
+          </div>
+          <span>只保存在你的设备里</span>
+        </div>
+      </template>
+
+      <div class="backup-panel__content">
+        <p class="backup-panel__lead">
+          导出菜单和口味记录，换手机或清理浏览器后还能再恢复。
+        </p>
+        <Divider type="dashed-brown" />
+
+        <div class="backup-panel__actions">
+          <Button type="primary" class="backup-panel__button" @click="exportBackup">导出备份</Button>
+          <Button
+            type="default"
+            class="backup-panel__button backup-panel__button--secondary"
+            @click="chooseBackup"
+          >
+            导入恢复
+          </Button>
+          <input
+            ref="fileInput"
+            data-testid="backup-file"
+            class="backup-panel__file"
+            type="file"
+            accept="application/json,.json"
+            @change="onFileChange"
+          />
+        </div>
+
+        <p v-if="importError" class="backup-panel__error" role="alert">{{ importError }}</p>
+
+        <div v-if="pendingBackup" class="backup-panel__preview" role="status">
+          <span>确认恢复</span>
+          <h3>{{ previewDate }} 的备份</h3>
+          <p>
+            菜单日期 {{ pendingBackup.menu.date }} ·
+            喜欢 {{ pendingBackup.preferences.likedIds.length }} 道 ·
+            不喜欢 {{ pendingBackup.preferences.dislikedIds.length }} 道
+          </p>
+          <div>
+            <Button data-testid="confirm-import" type="primary" @click="confirmImport">
+              覆盖并恢复
+            </Button>
+            <Button type="default" @click="pendingBackup = null">暂不恢复</Button>
+          </div>
+        </div>
       </div>
-      <span>只保存在你的设备里</span>
-    </div>
-
-    <p class="backup-panel__lead">
-      导出菜单和口味记录，换手机或清理浏览器后还能再恢复。
-    </p>
-
-    <div class="backup-panel__actions">
-      <button type="button" class="backup-panel__button" @click="exportBackup">
-        导出备份
-      </button>
-      <button
-        type="button"
-        class="backup-panel__button backup-panel__button--secondary"
-        @click="chooseBackup"
-      >
-        导入恢复
-      </button>
-      <input
-        ref="fileInput"
-        data-testid="backup-file"
-        class="backup-panel__file"
-        type="file"
-        accept="application/json,.json"
-        @change="onFileChange"
-      />
-    </div>
-
-    <p v-if="importError" class="backup-panel__error" role="alert">{{ importError }}</p>
-
-    <div v-if="pendingBackup" class="backup-panel__preview" role="status">
-      <span>确认恢复</span>
-      <h3>{{ previewDate }} 的备份</h3>
-      <p>
-        菜单日期 {{ pendingBackup.menu.date }} ·
-        喜欢 {{ pendingBackup.preferences.likedIds.length }} 道 ·
-        不喜欢 {{ pendingBackup.preferences.dislikedIds.length }} 道
-      </p>
-      <div>
-        <button
-          data-testid="confirm-import"
-          type="button"
-          @click="confirmImport"
-        >
-          覆盖并恢复
-        </button>
-        <button type="button" @click="pendingBackup = null">暂不恢复</button>
-      </div>
-    </div>
+    </Collapse>
   </section>
 </template>

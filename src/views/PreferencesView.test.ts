@@ -34,11 +34,13 @@ describe('口味偏好页面', () => {
     expect(wrapper.text()).toContain('家庭口味簿')
     expect(wrapper.text()).toContain('辣椒炒肉')
     expect(wrapper.text()).toContain('共记录 2 道菜')
+    expect(wrapper.find('[data-animal-component="tabs"]').exists()).toBe(true)
+    expect(wrapper.find('[data-animal-footer="tree"]').exists()).toBe(true)
 
     await wrapper.get('[data-testid="cancel-like"]').trigger('click')
     expect(preferences.isLiked('pepper-pork')).toBe(false)
 
-    await wrapper.get('[data-testid="disliked-tab"]').trigger('click')
+    await wrapper.get('[data-tab-key="disliked"]').trigger('click')
     expect(wrapper.text()).toContain('西红柿炒鸡蛋')
     await wrapper.get('[data-testid="restore-dish"]').trigger('click')
     expect(preferences.isDisliked('tomato-eggs')).toBe(false)
@@ -53,6 +55,7 @@ describe('口味偏好页面', () => {
       dislikedIds: ['pepper-pork'],
     })
     const wrapper = mountView()
+    await wrapper.get('[data-testid="backup-collapse"] [data-collapse-trigger]').trigger('click')
     const input = wrapper.get('[data-testid="backup-file"]')
     const file = {
       name: 'backup.json',
@@ -77,6 +80,7 @@ describe('口味偏好页面', () => {
     preferences.initialize()
     preferences.toggleLike('tomato-eggs')
     const wrapper = mountView()
+    await wrapper.get('[data-testid="backup-collapse"] [data-collapse-trigger]').trigger('click')
     const input = wrapper.get('[data-testid="backup-file"]')
     const file = {
       name: 'broken.json',

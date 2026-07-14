@@ -1,6 +1,6 @@
 <script setup lang="ts">
+import { Divider, Footer, Tabs, Title } from 'animal-island-vue'
 import { computed, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import DataBackupPanel from '../components/DataBackupPanel.vue'
 import PreferenceDishList from '../components/PreferenceDishList.vue'
 import { useMenuStore } from '../stores/menu'
@@ -16,6 +16,11 @@ menuStore.initialize()
 const visibleDishes = computed(() =>
   activeTab.value === 'liked' ? preferences.likedDishes : preferences.dislikedDishes,
 )
+
+const preferenceTabs = computed(() => [
+  { key: 'liked', label: `喜欢的菜 ${preferences.likedIds.length}` },
+  { key: 'disliked', label: `不喜欢的菜 ${preferences.dislikedIds.length}` },
+])
 
 const cancelLike = (dishId: string) => {
   preferences.toggleLike(dishId)
@@ -34,14 +39,12 @@ const restoreBackup = (backup: AppBackupV1) => {
 
 <template>
   <main v-if="menuStore.menu" class="preferences-view">
-    <header class="preferences-hero">
-      <RouterLink class="preferences-hero__back" to="/">← 回到今日菜单</RouterLink>
+    <header class="preferences-header">
       <p>一家人的私人口味</p>
-      <h1>家庭口味簿</h1>
-      <p class="preferences-hero__lead">
-        喜欢的菜会更常出现，不喜欢的菜就留在这里，想吃时再把它请回来。
-      </p>
-      <div class="preferences-hero__stats">
+      <Title size="large" color="brown">家庭口味簿</Title>
+      <Divider type="wave-yellow" />
+      <p class="preferences-header__lead">喜欢的菜会更常出现，不喜欢的菜就留在这里，想吃时再把它请回来。</p>
+      <div class="preferences-header__stats">
         <span><b>{{ preferences.likedIds.length }}</b> 喜欢</span>
         <span><b>{{ preferences.dislikedIds.length }}</b> 不喜欢</span>
         <span>共记录 {{ preferences.preferenceCount }} 道菜</span>
@@ -51,28 +54,10 @@ const restoreBackup = (backup: AppBackupV1) => {
     <section class="preferences-book" aria-labelledby="preferences-book-title">
       <div class="preferences-book__heading">
         <p>翻开今天的记录</p>
-        <h2 id="preferences-book-title">喜欢 / 不喜欢</h2>
+        <Title id="preferences-book-title" size="middle" color="brown">喜欢 / 不喜欢</Title>
       </div>
 
-      <div class="preferences-book__tabs" aria-label="口味偏好分类">
-        <button
-          type="button"
-          :aria-pressed="activeTab === 'liked'"
-          :class="{ 'is-active': activeTab === 'liked' }"
-          @click="activeTab = 'liked'"
-        >
-          喜欢的菜 <span>{{ preferences.likedIds.length }}</span>
-        </button>
-        <button
-          data-testid="disliked-tab"
-          type="button"
-          :aria-pressed="activeTab === 'disliked'"
-          :class="{ 'is-active': activeTab === 'disliked' }"
-          @click="activeTab = 'disliked'"
-        >
-          不喜欢的菜 <span>{{ preferences.dislikedIds.length }}</span>
-        </button>
-      </div>
+      <Tabs v-model="activeTab" :items="preferenceTabs" leaf-animation shadow />
 
       <PreferenceDishList
         :dishes="visibleDishes"
@@ -90,5 +75,8 @@ const restoreBackup = (backup: AppBackupV1) => {
       @before-export="menuStore.refreshDate()"
       @restore="restoreBackup"
     />
+
+    <p class="page-signoff">今天也要和喜欢的人，好好吃饭。</p>
+    <Footer type="tree" />
   </main>
 </template>
