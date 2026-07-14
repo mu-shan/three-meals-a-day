@@ -38,20 +38,22 @@ const onImageError = () => {
 </script>
 
 <template>
-  <article class="dish-card" :class="`dish-card--${dish.role}`">
-    <div class="dish-card__image-wrap">
-      <img class="dish-card__image" :src="imageSrc" :alt="dish.name" @error="onImageError" />
-      <span class="dish-card__role">{{ roleLabel[dish.role] }}</span>
+  <article class="flex gap-3 rounded-xl border border-line/60 bg-paper-soft/65 p-3">
+    <div class="relative h-18 w-18 shrink-0 overflow-hidden rounded-lg bg-sand/45">
+      <img class="h-full w-full object-cover" :src="imageSrc" :alt="dish.name" @error="onImageError" />
+      <span class="absolute right-1 bottom-1 rounded-full bg-paper/90 px-1.5 py-0.5 text-[10px] font-bold text-ink">{{ roleLabel[dish.role] }}</span>
     </div>
-    <div class="dish-card__content">
-      <div>
-        <h3>{{ dish.name }}</h3>
-        <p>{{ dish.ingredients.map((item) => item.name).join(' · ') }}</p>
+    <div class="min-w-0 flex-1">
+      <div class="flex items-start justify-between gap-2">
+        <div class="min-w-0">
+          <h3 class="m-0 truncate font-display text-lg text-ink">{{ dish.name }}</h3>
+          <p class="mt-1 mb-0 truncate text-xs text-muted">{{ dish.ingredients.map((item) => item.name).join(' · ') }}</p>
+        </div>
       </div>
-      <div class="dish-card__actions">
+      <div class="mt-3 grid grid-cols-3 gap-1.5">
         <Button
           data-testid="replace-dish"
-          class="dish-card__swap"
+          class="min-h-11 rounded-lg! border-line! bg-paper! px-1! text-xs! text-ink!"
           type="default"
           size="small"
           :disabled="disabled"
@@ -65,8 +67,7 @@ const onImageError = () => {
         </Button>
         <Button
           data-testid="like-dish"
-          class="dish-card__preference dish-card__preference--like"
-          :class="{ 'is-active': liked }"
+          :class="['min-h-11 rounded-lg! px-1! text-xs!', liked ? 'border-forest! bg-forest! text-white!' : 'border-line! bg-paper! text-ink!']"
           type="default"
           size="small"
           :disabled="disabled"
@@ -81,7 +82,7 @@ const onImageError = () => {
         </Button>
         <Button
           data-testid="dislike-dish"
-          class="dish-card__preference dish-card__preference--dislike"
+          class="min-h-11 rounded-lg! border-line! bg-paper! px-1! text-xs! text-ink!"
           type="default"
           size="small"
           :disabled="disabled"

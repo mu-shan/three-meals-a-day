@@ -88,29 +88,29 @@ const confirmImport = () => {
 </script>
 
 <template>
-  <section class="backup-panel" aria-labelledby="backup-panel-title">
-    <Collapse data-testid="backup-collapse">
+  <section class="mt-6 rounded-2xl border border-line/70 bg-paper/80 p-3 shadow-paper" aria-labelledby="backup-panel-title">
+    <Collapse data-testid="backup-collapse" class="block">
       <template #question>
-        <div class="backup-panel__heading">
+        <div class="flex w-full items-center justify-between gap-3 py-1 text-left">
           <div>
-            <p>留一份安心</p>
-            <Title id="backup-panel-title" size="middle" color="brown">数据备份与恢复</Title>
+            <p class="m-0 text-xs font-bold tracking-wide text-forest-dark">留一份安心</p>
+            <Title id="backup-panel-title" class="mt-1 block font-display text-xl text-ink" size="middle" color="brown">数据备份与恢复</Title>
           </div>
-          <span>只保存在你的设备里</span>
+          <span class="text-xs text-muted">只保存在你的设备里</span>
         </div>
       </template>
 
-      <div class="backup-panel__content">
-        <p class="backup-panel__lead">
+      <div class="pt-2">
+        <p class="m-0 text-sm leading-6 text-muted">
           导出菜单和口味记录，换手机或清理浏览器后还能再恢复。
         </p>
         <Divider type="dashed-brown" />
 
-        <div class="backup-panel__actions">
-          <Button type="primary" class="backup-panel__button" @click="exportBackup">导出备份</Button>
+        <div class="grid grid-cols-2 gap-2">
+          <Button type="primary" class="min-h-11 rounded-xl! bg-forest! text-sm! font-bold!" @click="exportBackup">导出备份</Button>
           <Button
             type="default"
-            class="backup-panel__button backup-panel__button--secondary"
+            class="min-h-11 rounded-xl! border-line! bg-paper-soft! text-sm! text-ink!"
             @click="chooseBackup"
           >
             导入恢复
@@ -118,16 +118,16 @@ const confirmImport = () => {
           <input
             ref="fileInput"
             data-testid="backup-file"
-            class="backup-panel__file"
+            class="sr-only"
             type="file"
             accept="application/json,.json"
             @change="onFileChange"
           />
         </div>
 
-        <p v-if="importError" class="backup-panel__error" role="alert">{{ importError }}</p>
+        <p v-if="importError" class="mt-3 mb-0 rounded-lg bg-clay/12 px-3 py-2 text-sm font-semibold text-clay" role="alert">{{ importError }}</p>
 
-        <div v-if="pendingBackup" class="backup-panel__preview" role="status">
+        <div v-if="pendingBackup" class="mt-3 rounded-xl bg-sand/25 p-3" role="status">
           <span>确认恢复</span>
           <h3>{{ previewDate }} 的备份</h3>
           <p>

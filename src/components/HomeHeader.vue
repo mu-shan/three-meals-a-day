@@ -49,22 +49,22 @@ const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').mat
 </script>
 
 <template>
-  <header class="home-header">
-    <div class="home-header__date-row">
-      <p>{{ formatDate(currentNow) }}</p>
-      <Time class="home-header__time" />
+  <header class="px-4 pt-7 pb-6 sm:px-5">
+    <div class="flex items-center justify-between gap-3">
+      <p class="m-0 font-display text-base font-bold tracking-wide text-ink">{{ formatDate(currentNow) }}</p>
+      <Time class="shrink-0" />
     </div>
-    <div class="home-header__greeting">
+    <div class="mt-6 text-sm font-semibold tracking-wide text-forest-dark">
       <Typewriter v-if="!reduceMotion" :text="greeting" :speed="45" />
       <span v-else>{{ greeting }}</span>
     </div>
-    <Title class="home-header__title" size="large" color="brown">
+    <Title class="mt-2 block font-display text-[2.6rem] leading-[.94] text-ink" size="large" color="brown">
       一家人的<br /><em>三顿饭</em>
     </Title>
     <MealProgress :now="currentNow" />
     <Button
       data-testid="generate-menu"
-      class="home-header__generate"
+      class="mt-5 min-h-14 w-full rounded-2xl! bg-forest! text-base! font-bold! shadow-paper transition-colors hover:bg-forest-dark!"
       type="primary"
       size="large"
       block

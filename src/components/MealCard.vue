@@ -27,24 +27,24 @@ const mealMeta = {
 </script>
 
 <template>
-  <section class="meal-card">
+  <section class="rounded-2xl border border-line/70 bg-paper/90 p-4 shadow-paper">
     <Card :color="mealMeta[props.meal.type].color" pattern="none">
-      <div class="meal-card__header">
+      <div class="flex items-start justify-between gap-3">
         <div>
-          <p>{{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}</p>
-          <Title size="middle" :color="mealMeta[props.meal.type].color">
+          <p class="m-0 text-xs font-bold tracking-wide text-muted">{{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}</p>
+          <Title class="mt-1 block font-display text-2xl text-ink" size="middle" :color="mealMeta[props.meal.type].color">
             {{ mealMeta[props.meal.type].title }}
           </Title>
         </div>
         <Button
           data-testid="reroll-meal"
-          class="meal-card__reroll"
+          class="min-h-11 shrink-0 rounded-xl! border-line! bg-paper-soft! text-ink!"
           type="default"
           size="small"
           :disabled="disabled"
           @click="emit('reroll')"
         >
-          <span class="meal-card__reroll-label">
+          <span class="flex items-center gap-1">
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 12a8 8 0 1 1-2.3-5.7L20 8M20 3v5h-5" />
             </svg>
@@ -55,7 +55,7 @@ const mealMeta = {
 
       <Divider type="dashed-brown" />
 
-      <div class="meal-card__dishes">
+      <div class="grid gap-3">
         <DishCard
           v-for="dish in meal.dishes"
           :key="dish.id"

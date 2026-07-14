@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from 'animal-island-vue'
 import { RouterLink } from 'vue-router'
 
 withDefaults(defineProps<{ preferenceCount?: number }>(), {
@@ -7,19 +8,15 @@ withDefaults(defineProps<{ preferenceCount?: number }>(), {
 </script>
 
 <template>
-  <nav class="app-navigation" aria-label="主要导航">
-    <RouterLink to="/">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 11.5 12 5l8 6.5M6.5 10v9h11v-9M9.5 19v-5h5v5" />
-      </svg>
+  <nav class="app-navigation fixed right-0 bottom-0 left-0 z-20 mx-auto flex w-full max-w-[560px] gap-2 border-t border-forest-dark/15 bg-paper/95 px-3 pt-2 pb-[calc(.5rem+env(safe-area-inset-bottom))] shadow-[0_-8px_22px_rgb(49_83_62_/_10%)] backdrop-blur" aria-label="主要导航">
+    <RouterLink to="/" class="flex min-h-13 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-bold text-muted transition-colors [&.router-link-exact-active]:bg-forest [&.router-link-exact-active]:text-white">
+      <Icon name="icon-map" :size="22" />
       <span>今日菜单</span>
     </RouterLink>
-    <RouterLink to="/preferences">
-      <span class="app-navigation__icon">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M12 20.5S4 16 4 9.5A4.5 4.5 0 0 1 12 6.7a4.5 4.5 0 0 1 8 2.8c0 6.5-8 11-8 11Z" />
-        </svg>
-        <b v-if="preferenceCount">{{ preferenceCount }}</b>
+    <RouterLink to="/preferences" class="flex min-h-13 flex-1 flex-col items-center justify-center gap-1 rounded-xl text-xs font-bold text-muted transition-colors [&.router-link-exact-active]:bg-forest [&.router-link-exact-active]:text-white">
+      <span class="relative leading-none">
+        <Icon name="icon-variant" :size="22" />
+        <b v-if="preferenceCount" class="absolute -top-2 -right-3 grid min-w-4 place-items-center rounded-full bg-clay px-1 py-0.5 text-[10px] leading-none text-white">{{ preferenceCount }}</b>
       </span>
       <span>口味偏好</span>
     </RouterLink>

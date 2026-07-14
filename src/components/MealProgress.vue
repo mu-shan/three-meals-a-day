@@ -16,25 +16,31 @@ const activeStep = computed(() => steps.find((step) => step.key === state.value.
 </script>
 
 <template>
-  <section class="meal-progress" aria-label="今日用餐时间进度">
-    <div class="meal-progress__heading">
+  <section class="mt-5 rounded-2xl border border-line/70 bg-paper/85 p-4 shadow-paper" aria-label="今日用餐时间进度">
+    <div class="flex items-center justify-between gap-3 text-xs font-bold tracking-wide text-muted">
       <span>今日用餐进度</span>
-      <span>{{ activeStep ? `下一餐 · ${activeStep.label}` : '今日三餐已到点' }}</span>
+      <span class="text-forest-dark">{{ activeStep ? `下一餐 · ${activeStep.label}` : '今日三餐已到点' }}</span>
     </div>
-    <ol>
+    <ol class="mt-4 grid grid-cols-3 gap-1">
       <li
         v-for="step in steps"
         :key="step.key"
         data-meal-step
-        :class="{
-          'is-completed': state.completed.includes(step.key),
-          'is-active': state.active === step.key,
-        }"
+        :class="[
+          'relative flex flex-col items-center gap-1 text-center text-xs font-semibold text-muted before:absolute before:top-2 before:left-1/2 before:-z-10 before:h-0.5 before:w-full before:bg-line last:before:hidden',
+          { 'is-completed text-forest': state.completed.includes(step.key), 'is-active text-forest-dark': state.active === step.key },
+        ]"
         :aria-current="state.active === step.key ? 'step' : undefined"
       >
-        <i aria-hidden="true" />
+        <i
+          aria-hidden="true"
+          :class="[
+            'h-4 w-4 rounded-full border-2 border-paper bg-paper shadow-sm',
+            { 'bg-forest': state.completed.includes(step.key), 'bg-clay ring-4 ring-clay/15': state.active === step.key },
+          ]"
+        />
         <span>{{ step.label }}</span>
-        <small>{{ step.time }}</small>
+        <small class="text-[10px] font-normal text-muted">{{ step.time }}</small>
       </li>
     </ol>
   </section>

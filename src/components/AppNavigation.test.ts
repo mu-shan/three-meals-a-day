@@ -22,6 +22,8 @@ describe('底部导航', () => {
     expect(links[0].text()).toContain('今日菜单')
     expect(links[0].attributes('aria-current')).toBe('page')
     expect(links[1].text()).toContain('3')
+    expect(wrapper.find('[data-animal-icon="icon-map"]').exists()).toBe(true)
+    expect(wrapper.find('[data-animal-icon="icon-variant"]').exists()).toBe(true)
 
     await router.push('/preferences')
     await flushPromises()

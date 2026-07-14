@@ -17,23 +17,22 @@ const visibleCategories = computed(() => categories.filter((category) => props.l
 </script>
 
 <template>
-  <section class="shopping-list" aria-labelledby="shopping-list-title">
-    <div class="shopping-list__heading">
+  <section class="mx-4 mb-6 rounded-2xl bg-forest p-4 text-paper shadow-paper sm:mx-5" aria-labelledby="shopping-list-title">
+    <div class="flex items-center gap-3">
       <Icon name="icon-shopping" :size="34" />
       <div>
-        <p>照着买，不漏样</p>
-        <Title id="shopping-list-title" size="middle" color="app-green">今日采购清单</Title>
+        <p class="m-0 text-xs font-bold tracking-wide text-paper/75">照着买，不漏样</p>
+        <Title id="shopping-list-title" class="mt-1 block font-display text-2xl text-paper" size="middle" color="app-green">今日采购清单</Title>
       </div>
     </div>
 
     <Divider type="wave-yellow" />
 
-    <div class="shopping-list__groups">
+    <div class="grid gap-2">
       <Collapse
         v-for="(category, index) in visibleCategories"
         :key="category"
-        class="shopping-list__group"
-        :class="`shopping-list__group--${categoryMeta[category].color}`"
+        class="rounded-xl bg-paper/12 px-3 py-1 text-paper"
         :default-expanded="index === 0"
       >
         <template #question>
