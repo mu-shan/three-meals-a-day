@@ -15,6 +15,7 @@ describe('当天菜单 store', () => {
     setActivePinia(createPinia())
     window.localStorage.clear()
     vi.useFakeTimers()
+    vi.setSystemTime(testDate)
   })
 
   it('初始化时恢复当天菜单并生成采购清单', () => {
