@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { Collapse, Divider, Icon, Title } from 'animal-island-vue'
+import { computed } from 'vue'
 import type { IngredientCategory, ShoppingListData } from '../types/menu'
 
-defineProps<{ list: ShoppingListData }>()
+const props = defineProps<{ list: ShoppingListData }>()
 
 const categoryMeta: Record<IngredientCategory, { label: string; color: string }> = {
   vegetables: { label: '蔬菜篮', color: 'green' },
@@ -11,32 +13,39 @@ const categoryMeta: Record<IngredientCategory, { label: string; color: string }>
 }
 
 const categories = Object.keys(categoryMeta) as IngredientCategory[]
+const visibleCategories = computed(() => categories.filter((category) => props.list[category].length))
 </script>
 
 <template>
   <section class="shopping-list" aria-labelledby="shopping-list-title">
     <div class="shopping-list__heading">
+      <Icon name="icon-shopping" :size="34" />
       <div>
         <p>照着买，不漏样</p>
-        <h2 id="shopping-list-title">今日采购清单</h2>
+        <Title id="shopping-list-title" size="middle" color="app-green">今日采购清单</Title>
       </div>
-      <span>{{ Object.values(list).reduce((total, items) => total + items.length, 0) }} 样食材</span>
     </div>
 
-    <div class="shopping-list__grid">
-      <article
-        v-for="category in categories.filter((item) => list[item].length > 0)"
+    <Divider type="wave-yellow" />
+
+    <div class="shopping-list__groups">
+      <Collapse
+        v-for="(category, index) in visibleCategories"
         :key="category"
         class="shopping-list__group"
         :class="`shopping-list__group--${categoryMeta[category].color}`"
+        :default-expanded="index === 0"
       >
-        <h3>{{ categoryMeta[category].label }}</h3>
+        <template #question>
+          <span>{{ categoryMeta[category].label }}</span>
+          <b>{{ list[category].length }} 样</b>
+        </template>
         <ul>
           <li v-for="item in list[category]" :key="item">
             <span />{{ item }}
           </li>
         </ul>
-      </article>
+      </Collapse>
     </div>
   </section>
 </template>

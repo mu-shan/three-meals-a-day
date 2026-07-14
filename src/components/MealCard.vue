@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import { Button, Card } from 'animal-island-vue'
+import { Button, Card, Divider, Title } from 'animal-island-vue'
 import type { Meal } from '../types/menu'
 import DishCard from './DishCard.vue'
 
 const props = withDefaults(
   defineProps<{
     meal: Meal
-    featured?: boolean
     likedIds?: ReadonlySet<string>
     disabled?: boolean
   }>(),
-  { featured: false, likedIds: () => new Set<string>(), disabled: false },
+  { likedIds: () => new Set<string>(), disabled: false },
 )
 
 const emit = defineEmits<{
@@ -28,12 +27,14 @@ const mealMeta = {
 </script>
 
 <template>
-  <section class="meal-card" :class="{ 'meal-card--featured': featured }">
+  <section class="meal-card">
     <Card :color="mealMeta[props.meal.type].color" pattern="none">
       <div class="meal-card__header">
         <div>
           <p>{{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}</p>
-          <h2>{{ mealMeta[props.meal.type].title }}</h2>
+          <Title size="middle" :color="mealMeta[props.meal.type].color">
+            {{ mealMeta[props.meal.type].title }}
+          </Title>
         </div>
         <Button
           data-testid="reroll-meal"
@@ -47,10 +48,12 @@ const mealMeta = {
             <svg viewBox="0 0 24 24" aria-hidden="true">
               <path d="M20 12a8 8 0 1 1-2.3-5.7L20 8M20 3v5h-5" />
             </svg>
-            换一桌
+            换一餐
           </span>
         </Button>
       </div>
+
+      <Divider type="dashed-brown" />
 
       <div class="meal-card__dishes">
         <DishCard

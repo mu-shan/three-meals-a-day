@@ -38,11 +38,13 @@ describe('家庭菜单组件', () => {
       dishes: [dishes.find((item) => item.id === 'steamed-rice')!],
     }
     const wrapper = mount(MealCard, {
-      props: { meal, featured: true, likedIds: new Set(['steamed-rice']) },
+      props: { meal, likedIds: new Set(['steamed-rice']) },
     })
 
     expect(wrapper.text()).toContain('午餐')
     expect(wrapper.text()).toContain('香喷喷米饭')
+    expect(wrapper.find('[data-animal-component="title"]').exists()).toBe(true)
+    expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(true)
     await wrapper.get('[data-testid="reroll-meal"]').trigger('click')
     await wrapper.get('[data-testid="replace-dish"]').trigger('click')
     await wrapper.get('[data-testid="like-dish"]').trigger('click')
@@ -69,6 +71,8 @@ describe('家庭菜单组件', () => {
     expect(wrapper.text()).toContain('肉蛋奶')
     expect(wrapper.text()).toContain('水果摊')
     expect(wrapper.text()).not.toContain('主食柜')
+    expect(wrapper.findAll('[data-collapse-trigger]')).toHaveLength(3)
+    expect(wrapper.find('[data-animal-icon="icon-shopping"]').exists()).toBe(true)
   })
 
 })

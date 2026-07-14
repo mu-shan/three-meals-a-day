@@ -46,7 +46,6 @@ menuStore.initialize()
           :meal="menuStore.menu.lunch"
           :liked-ids="preferences.rules.likedIds"
           :disabled="menuStore.isShuffling"
-          featured
           @reroll="menuStore.rerollMeal('lunch')"
           @replace="menuStore.rerollDish('lunch', $event)"
           @like="menuStore.toggleLike"
