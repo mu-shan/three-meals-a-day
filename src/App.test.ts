@@ -38,10 +38,11 @@ describe('移动端路由应用', () => {
     expect(preferences.isLiked(target.id)).toBe(true)
   })
 
-  it('首页口味偏好入口跳转独立路由', async () => {
+  it('从底部导航进入口味偏好页', async () => {
     const { wrapper, router } = await mountApp()
 
-    await wrapper.get('[data-testid="open-preferences"]').trigger('click')
+    expect(wrapper.find('[data-testid="open-preferences"]').exists()).toBe(false)
+    await wrapper.findAll('.app-navigation a')[1].trigger('click')
     await flushPromises()
 
     expect(router.currentRoute.value.name).toBe('preferences')

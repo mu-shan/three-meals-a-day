@@ -1,13 +1,11 @@
 <script setup lang="ts">
 import { Loading } from 'animal-island-vue'
-import { useRouter } from 'vue-router'
-import FamilyHero from '../components/FamilyHero.vue'
+import HomeHeader from '../components/HomeHeader.vue'
 import MealCard from '../components/MealCard.vue'
 import ShoppingList from '../components/ShoppingList.vue'
 import { useMenuStore } from '../stores/menu'
 import { usePreferencesStore } from '../stores/preferences'
 
-const router = useRouter()
 const menuStore = useMenuStore()
 const preferences = usePreferencesStore()
 
@@ -16,13 +14,7 @@ menuStore.initialize()
 
 <template>
   <main v-if="menuStore.menu" class="home-view">
-    <FamilyHero
-      :date="new Date()"
-      :loading="menuStore.isShuffling"
-      :preference-count="preferences.preferenceCount"
-      @generate="menuStore.generateAll"
-      @open-preferences="router.push('/preferences')"
-    />
+    <HomeHeader :loading="menuStore.isShuffling" @generate="menuStore.generateAll" />
 
     <section class="menu-board" aria-labelledby="menu-board-title" aria-live="polite">
       <div class="menu-board__heading">

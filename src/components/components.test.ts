@@ -4,7 +4,6 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { dishes } from '../data/dishes'
 import DishCard from './DishCard.vue'
-import FamilyHero from './FamilyHero.vue'
 import MealCard from './MealCard.vue'
 import ShoppingList from './ShoppingList.vue'
 
@@ -70,19 +69,6 @@ describe('家庭菜单组件', () => {
     expect(wrapper.text()).toContain('肉蛋奶')
     expect(wrapper.text()).toContain('水果摊')
     expect(wrapper.text()).not.toContain('主食柜')
-  })
-
-  it('家庭顶部区触发生成事件并显示本地日期', async () => {
-    const wrapper = mount(FamilyHero, {
-      props: { date: new Date(2026, 6, 10), loading: false, preferenceCount: 2 },
-    })
-
-    expect(wrapper.text()).toContain('7月10日')
-    expect(wrapper.text()).toContain('2')
-    await wrapper.get('[data-testid="generate-menu"]').trigger('click')
-    await wrapper.get('[data-testid="open-preferences"]').trigger('click')
-    expect(wrapper.emitted('generate')).toHaveLength(1)
-    expect(wrapper.emitted('open-preferences')).toHaveLength(1)
   })
 
 })
