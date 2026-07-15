@@ -10,6 +10,12 @@
   --color-ink: #49382d;
   --color-muted: #796654;
   --color-line: #cdbd95;
+  --color-baby: #d7ad38;
+  --color-baby-soft: #fff1b8;
+  --color-spicy: #c85b4a;
+  --color-spicy-soft: #f8d0c8;
+  --color-shared: #6f9b68;
+  --color-shared-soft: #dcebd4;
   --font-display: 'STSong', 'Songti SC', 'Noto Serif CJK SC', serif;
   --font-sans: 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
   --shadow-paper: 0 12px 30px rgb(73 56 45 / 12%);

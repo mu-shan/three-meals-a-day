@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Card, Divider, Title } from 'animal-island-vue'
+import { Button, Divider, Title } from 'animal-island-vue'
 import type { Meal } from '../types/menu'
 import DishCard from './DishCard.vue'
 
@@ -8,8 +8,15 @@ const props = withDefaults(
     meal: Meal
     likedIds?: ReadonlySet<string>
     disabled?: boolean
+    loading?: boolean
+    shufflingDishId?: string | null
   }>(),
-  { likedIds: () => new Set<string>(), disabled: false },
+  {
+    likedIds: () => new Set<string>(),
+    disabled: false,
+    loading: false,
+    shufflingDishId: null,
+  },
 )
 
 const emit = defineEmits<{
@@ -27,46 +34,49 @@ const mealMeta = {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-line/70 bg-paper/90 p-4 shadow-paper">
-    <Card :color="mealMeta[props.meal.type].color" pattern="none">
-      <div class="flex items-start justify-between gap-3">
-        <div>
-          <p class="m-0 text-xs font-bold tracking-wide text-muted">{{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}</p>
-          <Title class="mt-1 block font-display text-2xl text-ink" size="middle" :color="mealMeta[props.meal.type].color">
-            {{ mealMeta[props.meal.type].title }}
-          </Title>
-        </div>
-        <Button
-          data-testid="reroll-meal"
-          class="min-h-11 shrink-0 rounded-xl! border-line! bg-paper-soft! text-ink!"
-          type="default"
-          size="small"
-          :disabled="disabled"
-          @click="emit('reroll')"
+  <section class="rounded-2xl border border-line/75 bg-paper/95 p-3 shadow-paper sm:p-4">
+    <div class="flex items-start justify-between gap-3">
+      <div class="min-w-0">
+        <p class="m-0 text-xs font-bold tracking-wide text-muted">
+          {{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}
+        </p>
+        <Title
+          class="mt-1 block font-display text-2xl text-ink"
+          size="middle"
+          :color="mealMeta[props.meal.type].color"
         >
-          <span class="flex items-center gap-1">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M20 12a8 8 0 1 1-2.3-5.7L20 8M20 3v5h-5" />
-            </svg>
-            换一餐
-          </span>
-        </Button>
+          {{ mealMeta[props.meal.type].title }}
+        </Title>
       </div>
 
-      <Divider type="dashed-brown" />
+      <Button
+        data-testid="reroll-meal"
+        class="min-h-11 shrink-0 rounded-xl! border-line! bg-paper-soft! px-3! text-sm! text-ink!"
+        type="default"
+        size="small"
+        :loading="props.loading"
+        :disabled="props.disabled"
+        :aria-busy="props.loading"
+        @click="emit('reroll')"
+      >
+        ↻ 换一餐
+      </Button>
+    </div>
 
-      <div class="grid gap-3">
-        <DishCard
-          v-for="dish in meal.dishes"
-          :key="dish.id"
-          :dish="dish"
-          :liked="likedIds.has(dish.id)"
-          :disabled="disabled"
-          @replace="emit('replace', $event)"
-          @like="emit('like', $event)"
-          @dislike="emit('dislike', $event)"
-        />
-      </div>
-    </Card>
+    <Divider type="dashed-brown" />
+
+    <div class="grid gap-3">
+      <DishCard
+        v-for="dish in meal.dishes"
+        :key="dish.id"
+        :dish="dish"
+        :liked="likedIds.has(dish.id)"
+        :disabled="disabled"
+        :loading="shufflingDishId === dish.id"
+        @replace="emit('replace', $event)"
+        @like="emit('like', $event)"
+        @dislike="emit('dislike', $event)"
+      />
+    </div>
   </section>
 </template>
