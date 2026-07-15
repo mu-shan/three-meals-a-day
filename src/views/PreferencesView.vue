@@ -126,7 +126,7 @@ const restoreBackup = (backup: AppBackupV1) => {
           data-testid="liked-tab"
           role="tab"
           type="button"
-          aria-controls="preferences-panel-liked"
+          aria-controls="preferences-panel"
           :aria-selected="activeTab === 'liked'"
           :tabindex="activeTab === 'liked' ? 0 : -1"
           :class="tabClass('liked')"
@@ -141,7 +141,7 @@ const restoreBackup = (backup: AppBackupV1) => {
           data-testid="disliked-tab"
           role="tab"
           type="button"
-          aria-controls="preferences-panel-disliked"
+          aria-controls="preferences-panel"
           :aria-selected="activeTab === 'disliked'"
           :tabindex="activeTab === 'disliked' ? 0 : -1"
           :class="tabClass('disliked')"
@@ -153,7 +153,7 @@ const restoreBackup = (backup: AppBackupV1) => {
       </div>
 
       <div
-        :id="`preferences-panel-${activeTab}`"
+        id="preferences-panel"
         role="tabpanel"
         :aria-labelledby="`preferences-tab-${activeTab}`"
       >

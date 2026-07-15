@@ -48,7 +48,9 @@ describe('口味偏好页面', () => {
   })
 
   it('使用标准标签页语义关联当前口味列表', async () => {
-    const wrapper = mountView()
+    const host = document.createElement('div')
+    document.body.append(host)
+    const wrapper = mountView(host)
     const tablist = wrapper.get('[role="tablist"]')
     const likedTab = wrapper.get('[data-testid="liked-tab"]')
     const dislikedTab = wrapper.get('[data-testid="disliked-tab"]')
@@ -59,7 +61,7 @@ describe('口味偏好页面', () => {
       type: 'button',
       id: 'preferences-tab-liked',
       'aria-selected': 'true',
-      'aria-controls': 'preferences-panel-liked',
+      'aria-controls': 'preferences-panel',
       tabindex: '0',
     })
     expect(dislikedTab.attributes()).toMatchObject({
@@ -67,27 +69,39 @@ describe('口味偏好页面', () => {
       type: 'button',
       id: 'preferences-tab-disliked',
       'aria-selected': 'false',
-      'aria-controls': 'preferences-panel-disliked',
+      'aria-controls': 'preferences-panel',
       tabindex: '-1',
     })
 
     const likedPanel = wrapper.get('[role="tabpanel"]')
     expect(likedPanel.attributes()).toMatchObject({
-      id: 'preferences-panel-liked',
+      id: 'preferences-panel',
       'aria-labelledby': 'preferences-tab-liked',
     })
+    expect(document.querySelector('#preferences-panel')).toBe(likedPanel.element)
+    expect(document.querySelectorAll('#preferences-panel')).toHaveLength(1)
 
     await dislikedTab.trigger('click')
 
     const dislikedPanel = wrapper.get('[role="tabpanel"]')
     expect(dislikedPanel.attributes()).toMatchObject({
-      id: 'preferences-panel-disliked',
+      id: 'preferences-panel',
       'aria-labelledby': 'preferences-tab-disliked',
     })
+    expect(dislikedPanel.element).toBe(likedPanel.element)
+    expect(document.querySelector(`#${likedTab.attributes('aria-controls')}`)).toBe(dislikedPanel.element)
+    expect(document.querySelector(`#${dislikedTab.attributes('aria-controls')}`)).toBe(dislikedPanel.element)
+    expect(document.querySelectorAll('#preferences-panel')).toHaveLength(1)
     expect(likedTab.attributes('aria-selected')).toBe('false')
     expect(likedTab.attributes('tabindex')).toBe('-1')
     expect(dislikedTab.attributes('aria-selected')).toBe('true')
     expect(dislikedTab.attributes('tabindex')).toBe('0')
+
+    const ids = wrapper.findAll('[id]').map((node) => node.attributes('id'))
+    expect(new Set(ids).size).toBe(ids.length)
+
+    wrapper.unmount()
+    host.remove()
   })
 
   it('支持使用方向键和首尾键循环切换标签页', async () => {
