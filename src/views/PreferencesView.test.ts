@@ -60,6 +60,7 @@ describe('口味偏好页面', () => {
     for (const button of backupButtons) {
       expect(button.classes()).toContain('shadow-button!')
     }
+    expect(backupButtons[0].classes()).toContain('text-white!')
   })
 
   it('使用标准标签页语义关联当前口味列表', async () => {

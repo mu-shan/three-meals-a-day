@@ -107,7 +107,7 @@ const confirmImport = () => {
     <div class="grid grid-cols-2 gap-2">
       <Button
         type="primary"
-        class="min-h-12 rounded-xl! bg-forest! text-sm! font-bold! shadow-button! active:translate-y-1! active:shadow-none!"
+        class="min-h-12 rounded-xl! bg-forest! text-sm! font-bold! text-white! shadow-button! active:translate-y-1! active:shadow-none!"
         @click="exportBackup"
       >
         导出备份
