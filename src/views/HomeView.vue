@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { Footer } from 'animal-island-vue'
+import AppFooter from '../components/AppFooter.vue'
+import CardCornerDecoration from '../components/CardCornerDecoration.vue'
 import HomeHeader from '../components/HomeHeader.vue'
 import MealCard from '../components/MealCard.vue'
 import ShoppingList from '../components/ShoppingList.vue'
 import { useMenuStore } from '../stores/menu'
 import { usePreferencesStore } from '../stores/preferences'
-import { dishRoleMeta } from '../ui/dishRoleMeta'
 
 const menuStore = useMenuStore()
 const preferences = usePreferencesStore()
-const legendRoles = ['baby', 'spicy', 'shared'] as const
 
 menuStore.initialize()
 </script>
@@ -19,11 +18,13 @@ menuStore.initialize()
     <HomeHeader :disabled="menuStore.isShuffling" @generate="menuStore.generateAll" />
 
     <section
-      class="mx-3 rounded-3xl border border-line/75 bg-paper/90 p-3 shadow-paper sm:mx-4 sm:p-4"
+      class="relative mx-3 overflow-hidden rounded-3xl border border-line/75 bg-paper/90 p-3 shadow-paper sm:mx-4 sm:p-4"
       aria-labelledby="menu-board-title"
       aria-live="polite"
     >
-      <div class="mb-4 flex flex-wrap items-end justify-between gap-3">
+      <CardCornerDecoration variant="meal" />
+
+      <div class="relative z-10 mb-4 pr-20 sm:pr-24">
         <div>
           <p class="m-0 text-xs font-bold tracking-[.12em] text-forest-dark">
             今日餐桌 · 已经安排好啦
@@ -33,25 +34,9 @@ menuStore.initialize()
           </h2>
         </div>
 
-        <div
-          class="flex flex-wrap gap-x-3 gap-y-1.5 text-[11px] font-semibold text-muted"
-          aria-label="菜品标签说明"
-        >
-          <span
-            v-for="role in legendRoles"
-            :key="role"
-            class="inline-flex items-center gap-1.5"
-          >
-            <span
-              :class="['size-2.5 rounded-full', dishRoleMeta[role].legendClass]"
-              aria-hidden="true"
-            ></span>
-            {{ dishRoleMeta[role].label }}
-          </span>
-        </div>
       </div>
 
-      <div class="grid gap-4">
+      <div class="relative z-10 grid gap-4">
         <MealCard
           :meal="menuStore.menu.breakfast"
           :liked-ids="preferences.rules.likedIds"
@@ -114,10 +99,6 @@ menuStore.initialize()
 
     <ShoppingList :list="menuStore.shoppingList" />
 
-    <footer class="mx-4 mt-7 border-t border-line/70 px-1 pt-4 text-center text-xs leading-6 text-muted sm:mx-5">
-      <p class="m-0 font-display text-sm text-ink">今天也要和喜欢的人，好好吃饭。</p>
-      <span>菜单随机生成 · 少盐少辣照顾小朋友</span>
-    </footer>
-    <Footer type="tree" />
+    <AppFooter show-description />
   </main>
 </template>

@@ -40,13 +40,19 @@ describe('家庭菜单组件', () => {
     expect(wrapper.get('[data-testid="role-label"]').classes()).toContain(badgeClass)
   })
 
-  it('菜品卡在窄屏把菜名移到偏好按钮下方', () => {
+  it('菜品卡左侧显示小图，右侧分为信息和操作两层', () => {
     const dish = dishes.find((item) => item.id === 'tomato-eggs')!
     const wrapper = mount(DishCard, { props: { dish } })
 
-    expect(wrapper.get('h3').classes()).toEqual(
-      expect.arrayContaining(['pr-24', 'max-[380px]:pt-12', 'max-[380px]:pr-0']),
+    expect(wrapper.get('[data-testid="dish-image-wrap"]').classes()).toEqual(
+      expect.arrayContaining(['row-span-2', 'w-16', 'min-[381px]:w-20']),
     )
+    expect(wrapper.get('img').classes()).toEqual(
+      expect.arrayContaining(['size-10', 'min-[381px]:size-12', 'object-contain']),
+    )
+    expect(wrapper.get('h3').classes()).not.toContain('pr-24')
+    expect(wrapper.get('[data-testid="dish-actions"]').classes()).toContain('col-start-2')
+    expect(wrapper.get('[data-testid="dish-actions"]').findAll('button')).toHaveLength(3)
   })
 
   it('菜品卡展示偏好图形与换菜加载状态', () => {
@@ -74,7 +80,7 @@ describe('家庭菜单组件', () => {
     { type: 'breakfast' as const, color: 'app-yellow' },
     { type: 'lunch' as const, color: 'app-green' },
     { type: 'dinner' as const, color: 'app-orange' },
-  ])('$type 餐次使用对应标题配色和分隔线', ({ type, color }) => {
+  ])('$type 餐次使用对应标题配色', ({ type, color }) => {
     const wrapper = mount(MealCard, {
       props: {
         meal: { type, dishes: [dishes.find((item) => item.id === 'steamed-rice')!] },
@@ -90,7 +96,15 @@ describe('家庭菜单组件', () => {
     expect(wrapper.get(`#${headingId}`).find('[data-animal-component="title"]').exists()).toBe(
       true,
     )
-    expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(true)
+    expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(false)
+    const mealControls = wrapper.get('[data-testid="meal-controls"]')
+    expect(mealControls.classes()).toContain('flex-col')
+    const mealRoleLegend = wrapper.find('[data-testid="meal-role-legend"]')
+    expect(mealRoleLegend.exists()).toBe(type === 'lunch')
+    if (type === 'lunch') {
+      expect(mealRoleLegend.classes()).toContain('justify-end')
+      expect(mealRoleLegend.element.parentElement).toBe(mealControls.element)
+    }
   })
 
   it('餐次卡在启用状态通过真实点击向上转发事件', async () => {
@@ -116,7 +130,7 @@ describe('家庭菜单组件', () => {
     expect(wrapper.emitted('dislike')).toEqual([['steamed-rice']])
   })
 
-  it('餐次换新时只标记换一餐按钮为忙碌', () => {
+  it('餐次换新时只标记换一桌按钮为忙碌', () => {
     const wrapper = mount(MealCard, {
       props: {
         meal: {
@@ -184,10 +198,13 @@ describe('家庭菜单组件', () => {
     const wrapper = mount(ShoppingList, {
       props: {
         list: {
-          vegetables: ['西红柿', '土豆'],
-          protein: ['鸡蛋'],
+          vegetables: [
+            { name: '西红柿', mealTypes: ['lunch', 'dinner'] },
+            { name: '土豆', mealTypes: ['dinner'] },
+          ],
+          protein: [{ name: '鸡蛋', mealTypes: ['breakfast', 'lunch'] }],
           staples: [],
-          fruit: ['香蕉'],
+          fruit: [{ name: '香蕉', mealTypes: ['breakfast'] }],
         },
       },
     })
@@ -199,10 +216,17 @@ describe('家庭菜单组件', () => {
     const triggers = wrapper.findAll('[data-collapse-trigger]')
     expect(triggers).toHaveLength(3)
     expect(triggers[0].attributes('aria-expanded')).toBe('true')
-    expect(triggers[0].text()).toContain('2 样')
+    expect(triggers[0].find('b').text()).toBe('2')
+    expect(triggers[0].find('b').classes()).toContain('mx-1.5')
     expect(wrapper.find('[data-animal-component="title"]').exists()).toBe(false)
+    expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(false)
     expect(wrapper.get('#shopping-list-title').element.tagName).toBe('H2')
     expect(wrapper.get('section').attributes('aria-labelledby')).toBe('shopping-list-title')
+    expect(wrapper.get('section').classes()).toContain('mt-6')
     expect(wrapper.find('[data-animal-icon="icon-shopping"]').exists()).toBe(true)
+    expect(wrapper.find('[data-testid="card-corner-decoration-shopping"]').exists()).toBe(true)
+    const tomatoItem = wrapper.get('[data-testid="shopping-item-西红柿"]')
+    expect(tomatoItem.find('[data-meal-type="lunch"]').text()).toBe('午')
+    expect(tomatoItem.find('[data-meal-type="dinner"]').text()).toBe('晚')
   })
 })

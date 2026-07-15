@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { Footer } from 'animal-island-vue'
 import { computed, nextTick, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import AppFooter from '../components/AppFooter.vue'
+import AppTopBar from '../components/AppTopBar.vue'
 import DataBackupPanel from '../components/DataBackupPanel.vue'
 import PreferenceDishList from '../components/PreferenceDishList.vue'
 import { useMenuStore } from '../stores/menu'
@@ -83,6 +84,8 @@ const restoreBackup = (backup: AppBackupV1) => {
 
 <template>
   <main v-if="menuStore.menu" class="w-full px-3.5 pt-8 pb-10 sm:px-5">
+    <AppTopBar class="-mx-3.5 -mt-8 mb-8 sm:-mx-5" />
+
     <header class="relative overflow-hidden rounded-[30px] border-[3px] border-ink bg-paper px-4 py-6 shadow-paper sm:px-5">
       <RouterLink
         class="mb-6 inline-flex min-h-11 items-center rounded-full border-2 border-forest/25 bg-white/70 px-3 text-xs font-bold text-forest-dark no-underline"
@@ -175,7 +178,6 @@ const restoreBackup = (backup: AppBackupV1) => {
       @restore="restoreBackup"
     />
 
-    <p class="mt-7 border-t border-line/70 pt-4 text-center font-display text-sm text-ink">今天也要和喜欢的人，好好吃饭。</p>
-    <Footer type="tree" />
+    <AppFooter />
   </main>
 </template>
