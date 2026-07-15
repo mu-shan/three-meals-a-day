@@ -22,6 +22,7 @@
   --color-shared-soft: #dcebd4;
   --font-display: 'ZCOOL KuaiLe', 'STKaiti', 'KaiTi', cursive;
   --font-sans: 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
+  --shadow-button: 0 4px 0 rgb(73 56 45 / 18%);
   --shadow-paper: 0 12px 30px rgb(73 56 45 / 12%);
 }
 

@@ -105,10 +105,16 @@ const confirmImport = () => {
     </p>
 
     <div class="grid grid-cols-2 gap-2">
-      <Button type="primary" class="min-h-12 rounded-xl! bg-forest! text-sm! font-bold!" @click="exportBackup">导出备份</Button>
+      <Button
+        type="primary"
+        class="min-h-12 rounded-xl! bg-forest! text-sm! font-bold! shadow-button! active:translate-y-1! active:shadow-none!"
+        @click="exportBackup"
+      >
+        导出备份
+      </Button>
       <Button
         type="default"
-        class="min-h-12 rounded-xl! border-line! bg-paper-soft! text-sm! text-ink!"
+        class="min-h-12 rounded-xl! border-line! bg-paper-soft! text-sm! text-ink! shadow-button! active:translate-y-1! active:shadow-none!"
         @click="chooseBackup"
       >
         导入恢复

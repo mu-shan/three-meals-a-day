@@ -47,6 +47,21 @@ describe('口味偏好页面', () => {
     expect(preferences.isDisliked('tomato-eggs')).toBe(false)
   })
 
+  it('分类和备份操作使用一致的抬起阴影', () => {
+    const wrapper = mountView()
+    const tabs = wrapper.findAll('[role="tab"]')
+    const backupButtons = wrapper.findAll(
+      'section[aria-labelledby="backup-panel-title"] button',
+    )
+
+    expect(tabs).toHaveLength(2)
+    expect(backupButtons).toHaveLength(2)
+    for (const tab of tabs) expect(tab.classes()).toContain('shadow-button')
+    for (const button of backupButtons) {
+      expect(button.classes()).toContain('shadow-button!')
+    }
+  })
+
   it('使用标准标签页语义关联当前口味列表', async () => {
     const host = document.createElement('div')
     document.body.append(host)

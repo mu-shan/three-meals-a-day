@@ -28,9 +28,9 @@ const visibleDishes = computed(() =>
 )
 
 const tabClass = (tab: PreferenceTab) => [
-  'min-h-11 rounded-xl border-2 px-2 text-xs font-bold transition-colors',
+  'min-h-11 rounded-xl border-2 px-2 text-xs font-bold shadow-button transition-[transform,box-shadow,background-color,border-color,color] active:translate-y-1 active:shadow-none',
   activeTab.value === tab
-    ? 'border-forest bg-forest text-white shadow-[0_4px_0_rgba(49,105,72,0.2)]'
+    ? 'border-forest bg-forest text-white'
     : 'border-line bg-paper-soft text-muted',
 ]
 
