@@ -201,6 +201,8 @@ describe('家庭菜单组件', () => {
     expect(triggers[0].attributes('aria-expanded')).toBe('true')
     expect(triggers[0].text()).toContain('2 样')
     expect(wrapper.find('[data-animal-component="title"]').exists()).toBe(false)
+    expect(wrapper.get('#shopping-list-title').element.tagName).toBe('H2')
+    expect(wrapper.get('section').attributes('aria-labelledby')).toBe('shopping-list-title')
     expect(wrapper.find('[data-animal-icon="icon-shopping"]').exists()).toBe(true)
   })
 })
