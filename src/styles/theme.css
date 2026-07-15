@@ -1,3 +1,4 @@
+@import url('https://cdn.jsdelivr.net/npm/@fontsource/zcool-kuaile@5.2.8/400.css');
 @import 'tailwindcss';
 
 @theme {
@@ -19,7 +20,7 @@
   --color-shared: #6f9b68;
   --color-shared-deep: #3f663b;
   --color-shared-soft: #dcebd4;
-  --font-display: 'STSong', 'Songti SC', 'Noto Serif CJK SC', serif;
+  --font-display: 'ZCOOL KuaiLe', 'STKaiti', 'KaiTi', cursive;
   --font-sans: 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
   --shadow-paper: 0 12px 30px rgb(73 56 45 / 12%);
 }
