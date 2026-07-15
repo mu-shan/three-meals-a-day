@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Collapse, Divider, Title } from 'animal-island-vue'
+import { Button } from 'animal-island-vue'
 import { computed, nextTick, ref } from 'vue'
 import {
   createAppBackup,
@@ -88,61 +88,68 @@ const confirmImport = () => {
 </script>
 
 <template>
-  <section class="mt-6 rounded-2xl border border-line/70 bg-paper/80 p-3 shadow-paper" aria-labelledby="backup-panel-title">
-    <Collapse data-testid="backup-collapse" class="block">
-      <template #question>
-        <div class="flex w-full items-center justify-between gap-3 py-1 text-left">
-          <div>
-            <p class="m-0 text-xs font-bold tracking-wide text-forest-dark">留一份安心</p>
-            <Title id="backup-panel-title" class="mt-1 block font-display text-xl text-ink" size="middle" color="brown">数据备份与恢复</Title>
-          </div>
-          <span class="text-xs text-muted">只保存在你的设备里</span>
-        </div>
-      </template>
-
-      <div class="pt-2">
-        <p class="m-0 text-sm leading-6 text-muted">
-          导出菜单和口味记录，换手机或清理浏览器后还能再恢复。
-        </p>
-        <Divider type="dashed-brown" />
-
-        <div class="grid grid-cols-2 gap-2">
-          <Button type="primary" class="min-h-11 rounded-xl! bg-forest! text-sm! font-bold!" @click="exportBackup">导出备份</Button>
-          <Button
-            type="default"
-            class="min-h-11 rounded-xl! border-line! bg-paper-soft! text-sm! text-ink!"
-            @click="chooseBackup"
-          >
-            导入恢复
-          </Button>
-          <input
-            ref="fileInput"
-            data-testid="backup-file"
-            class="sr-only"
-            type="file"
-            accept="application/json,.json"
-            @change="onFileChange"
-          />
-        </div>
-
-        <p v-if="importError" class="mt-3 mb-0 rounded-lg bg-clay/12 px-3 py-2 text-sm font-semibold text-clay" role="alert">{{ importError }}</p>
-
-        <div v-if="pendingBackup" class="mt-3 rounded-xl bg-sand/25 p-3" role="status">
-          <span>确认恢复</span>
-          <h3>{{ previewDate }} 的备份</h3>
-          <p>
-            菜单日期 {{ pendingBackup.menu.date }} ·
-            喜欢 {{ pendingBackup.preferences.likedIds.length }} 道 ·
-            不喜欢 {{ pendingBackup.preferences.dislikedIds.length }} 道
-          </p>
-          <div>
-            <Button data-testid="confirm-import" type="primary" @click="confirmImport">
-              覆盖并恢复
-            </Button>
-            <Button type="default" @click="pendingBackup = null">暂不恢复</Button>
-          </div>
-        </div>
+  <section
+    class="mt-7 mb-6 rounded-[28px] border-[3px] border-ink bg-paper px-4 py-6 shadow-paper"
+    aria-labelledby="backup-panel-title"
+  >
+    <div class="flex items-end justify-between gap-3">
+      <div>
+        <p class="m-0 text-xs font-bold tracking-wide text-forest-dark">留一份安心</p>
+        <h2 id="backup-panel-title" class="mt-1 mb-0 font-display text-[2rem] font-normal text-ink">数据备份</h2>
       </div>
-    </Collapse>
+      <span class="pb-1 text-right text-[10px] font-bold text-muted">只保存在你的设备里</span>
+    </div>
+
+    <p class="my-4 text-sm leading-6 font-semibold text-muted">
+      导出菜单和口味记录，换手机或清理浏览器后还能再恢复。
+    </p>
+
+    <div class="grid grid-cols-2 gap-2">
+      <Button type="primary" class="min-h-12 rounded-xl! bg-forest! text-sm! font-bold!" @click="exportBackup">导出备份</Button>
+      <Button
+        type="default"
+        class="min-h-12 rounded-xl! border-line! bg-paper-soft! text-sm! text-ink!"
+        @click="chooseBackup"
+      >
+        导入恢复
+      </Button>
+      <input
+        ref="fileInput"
+        data-testid="backup-file"
+        class="sr-only"
+        type="file"
+        accept="application/json,.json"
+        @change="onFileChange"
+      />
+    </div>
+
+    <p v-if="importError" class="mt-3 mb-0 rounded-lg bg-clay/12 px-3 py-2 text-sm font-semibold text-clay" role="alert">{{ importError }}</p>
+
+    <div v-if="pendingBackup" class="mt-4 rounded-2xl border-2 border-dashed border-line bg-sand/25 p-3" role="status">
+      <span class="text-[10px] font-bold tracking-widest text-clay">确认恢复</span>
+      <h3 class="my-1 text-sm text-ink">{{ previewDate }} 的备份</h3>
+      <p class="m-0 text-xs leading-5 text-muted">
+        菜单日期 {{ pendingBackup.menu.date }} ·
+        喜欢 {{ pendingBackup.preferences.likedIds.length }} 道 ·
+        不喜欢 {{ pendingBackup.preferences.dislikedIds.length }} 道
+      </p>
+      <div class="mt-3 flex flex-wrap gap-2">
+        <Button
+          data-testid="confirm-import"
+          type="primary"
+          class="min-h-11 rounded-full! bg-forest! px-3! text-xs! font-bold!"
+          @click="confirmImport"
+        >
+          覆盖并恢复
+        </Button>
+        <Button
+          type="default"
+          class="min-h-11 rounded-full! border-line! bg-transparent! px-3! text-xs! text-muted!"
+          @click="pendingBackup = null"
+        >
+          暂不恢复
+        </Button>
+      </div>
+    </div>
   </section>
 </template>

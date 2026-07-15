@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Divider, Footer, Tabs, Title } from 'animal-island-vue'
+import { Footer } from 'animal-island-vue'
 import { computed, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import DataBackupPanel from '../components/DataBackupPanel.vue'
 import PreferenceDishList from '../components/PreferenceDishList.vue'
 import { useMenuStore } from '../stores/menu'
@@ -17,10 +18,12 @@ const visibleDishes = computed(() =>
   activeTab.value === 'liked' ? preferences.likedDishes : preferences.dislikedDishes,
 )
 
-const preferenceTabs = computed(() => [
-  { key: 'liked', label: `喜欢的菜 ${preferences.likedIds.length}` },
-  { key: 'disliked', label: `不喜欢的菜 ${preferences.dislikedIds.length}` },
-])
+const tabClass = (tab: 'liked' | 'disliked') => [
+  'min-h-11 rounded-xl border-2 px-2 text-xs font-bold transition-colors',
+  activeTab.value === tab
+    ? 'border-forest bg-forest text-white shadow-[0_4px_0_rgba(49,105,72,0.2)]'
+    : 'border-line bg-paper-soft text-muted',
+]
 
 const cancelLike = (dishId: string) => {
   preferences.toggleLike(dishId)
@@ -38,26 +41,63 @@ const restoreBackup = (backup: AppBackupV1) => {
 </script>
 
 <template>
-  <main v-if="menuStore.menu" class="px-4 pt-7 pb-6 sm:px-5">
-    <header>
+  <main v-if="menuStore.menu" class="w-full px-3.5 pt-8 pb-10 sm:px-5">
+    <header class="relative overflow-hidden rounded-[30px] border-[3px] border-ink bg-paper px-4 py-6 shadow-paper sm:px-5">
+      <RouterLink
+        class="mb-6 inline-flex min-h-11 items-center rounded-full border-2 border-forest/25 bg-white/70 px-3 text-xs font-bold text-forest-dark no-underline"
+        to="/"
+      >
+        ← 回到今日菜单
+      </RouterLink>
       <p class="m-0 text-xs font-bold tracking-[.14em] text-forest-dark">一家人的私人口味</p>
-      <Title class="mt-2 block font-display text-[2.4rem] leading-none text-ink" size="large" color="brown">家庭口味簿</Title>
-      <Divider type="wave-yellow" />
-      <p class="mt-3 mb-4 text-sm leading-6 text-muted">喜欢的菜会更常出现，不喜欢的菜就留在这里，想吃时再把它请回来。</p>
+      <h1 class="mt-2 mb-0 font-display text-[clamp(2.75rem,14vw,4.5rem)] leading-none font-normal tracking-[-.05em] text-ink">家庭口味簿</h1>
+      <p class="mt-4 mb-5 text-sm leading-6 font-semibold text-muted">
+        喜欢的菜会更常出现，不喜欢的菜就留在这里，想吃时再把它请回来。
+      </p>
       <div class="grid grid-cols-3 gap-2">
-        <span class="rounded-xl border border-line/60 bg-paper/80 px-2 py-3 text-center text-xs text-muted"><b class="block font-display text-2xl text-clay">{{ preferences.likedIds.length }}</b>喜欢</span>
-        <span class="rounded-xl border border-line/60 bg-paper/80 px-2 py-3 text-center text-xs text-muted"><b class="block font-display text-2xl text-clay">{{ preferences.dislikedIds.length }}</b>不喜欢</span>
-        <span class="rounded-xl border border-line/60 bg-paper/80 px-2 py-3 text-center text-xs text-muted"><b class="block font-display text-2xl text-clay">{{ preferences.preferenceCount }}</b>共记录 {{ preferences.preferenceCount }} 道菜</span>
+        <span class="min-w-0 rounded-xl border border-line/60 bg-white/65 px-1 py-3 text-center text-[10px] font-bold text-muted">
+          <b class="block font-display text-2xl font-normal text-clay">{{ preferences.likedIds.length }}</b>
+          喜欢
+        </span>
+        <span class="min-w-0 rounded-xl border border-line/60 bg-white/65 px-1 py-3 text-center text-[10px] font-bold text-muted">
+          <b class="block font-display text-2xl font-normal text-clay">{{ preferences.dislikedIds.length }}</b>
+          不喜欢
+        </span>
+        <span class="flex min-w-0 items-center justify-center rounded-xl border border-forest bg-forest px-1 py-3 text-center text-[10px] font-bold text-white">
+          共记录 {{ preferences.preferenceCount }} 道菜
+        </span>
       </div>
     </header>
 
-    <section class="mt-6" aria-labelledby="preferences-book-title">
+    <section
+      class="mt-7 rounded-[28px] border-[3px] border-ink bg-paper px-4 py-6 shadow-paper"
+      aria-labelledby="preferences-book-title"
+    >
       <div>
         <p class="m-0 text-xs font-bold tracking-wide text-forest-dark">翻开今天的记录</p>
-        <Title id="preferences-book-title" class="mt-1 block font-display text-2xl text-ink" size="middle" color="brown">喜欢 / 不喜欢</Title>
+        <h2 id="preferences-book-title" class="mt-1 mb-0 font-display text-[2rem] font-normal text-ink">喜欢 / 不喜欢</h2>
       </div>
 
-      <Tabs v-model="activeTab" :items="preferenceTabs" leaf-animation shadow />
+      <div class="my-5 grid grid-cols-2 gap-2" aria-label="口味偏好分类">
+        <button
+          data-testid="liked-tab"
+          type="button"
+          :aria-pressed="activeTab === 'liked'"
+          :class="tabClass('liked')"
+          @click="activeTab = 'liked'"
+        >
+          喜欢的菜 <span class="ml-1 inline-grid size-5 place-items-center rounded-full bg-black/8 text-[10px]">{{ preferences.likedIds.length }}</span>
+        </button>
+        <button
+          data-testid="disliked-tab"
+          type="button"
+          :aria-pressed="activeTab === 'disliked'"
+          :class="tabClass('disliked')"
+          @click="activeTab = 'disliked'"
+        >
+          不喜欢的菜 <span class="ml-1 inline-grid size-5 place-items-center rounded-full bg-black/8 text-[10px]">{{ preferences.dislikedIds.length }}</span>
+        </button>
+      </div>
 
       <PreferenceDishList
         :dishes="visibleDishes"
