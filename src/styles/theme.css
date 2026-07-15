@@ -73,16 +73,6 @@
 }
 
 @layer components {
-  .animal-time__date {
-    display: none;
-  }
-
-  .animal-time {
-    border-radius: 9999px;
-    background: var(--color-forest);
-    color: white;
-  }
-
   .animal-footer {
     display: block;
     padding-bottom: 1rem;

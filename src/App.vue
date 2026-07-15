@@ -30,6 +30,23 @@ onBeforeUnmount(() => {
 
     <AppNavigation :preference-count="preferences.preferenceCount" />
 
+    <Transition name="full-page-loading">
+      <div
+        v-if="menuStore.shuffleTarget?.scope === 'all'"
+        data-testid="full-page-loading"
+        class="fixed inset-y-0 left-1/2 z-50 grid w-full max-w-[560px] -translate-x-1/2 place-items-center bg-forest-dark/45 px-6 backdrop-blur-sm"
+        role="dialog"
+        aria-modal="true"
+        aria-label="正在生成今日菜单"
+      >
+        <div class="w-full max-w-xs rounded-[2rem] border-2 border-ink/15 bg-paper px-6 py-7 text-center shadow-paper motion-safe:animate-pulse">
+          <span class="block text-4xl" aria-hidden="true">🏝️</span>
+          <p class="mt-4 mb-0 font-display text-xl font-bold text-ink">正在给餐桌换新菜…</p>
+          <p class="mt-2 mb-0 text-sm font-semibold text-muted">马上就开饭</p>
+        </div>
+      </div>
+    </Transition>
+
     <Transition name="preference-toast">
       <div
         v-if="menuStore.feedback"

@@ -49,6 +49,40 @@ describe('移动端路由应用', () => {
     expect(wrapper.text()).toContain('口味偏好')
   })
 
+  it('整桌换新时展示整页加载遮罩', async () => {
+    const { wrapper } = await mountApp()
+    const menuStore = useMenuStore()
+
+    await wrapper.get('[data-testid="generate-menu"]').trigger('click')
+
+    expect(menuStore.shuffleTarget).toEqual({ scope: 'all' })
+    const overlay = wrapper.get('[data-testid="full-page-loading"]')
+    expect(overlay.attributes('aria-modal')).toBe('true')
+    expect(overlay.text()).toContain('正在给餐桌换新菜')
+
+    await vi.advanceTimersByTimeAsync(420)
+
+    expect(wrapper.find('[data-testid="full-page-loading"]').exists()).toBe(false)
+  })
+
+  it('单餐和单菜换新时只展示局部加载状态', async () => {
+    const { wrapper } = await mountApp()
+
+    const mealButton = wrapper.findAll('[data-testid="reroll-meal"]')[1]
+    await mealButton.trigger('click')
+
+    expect(wrapper.find('[data-testid="full-page-loading"]').exists()).toBe(false)
+    expect(mealButton.attributes('aria-busy')).toBe('true')
+
+    await vi.advanceTimersByTimeAsync(420)
+
+    const dishButton = wrapper.findAll('[data-testid="replace-dish"]')[0]
+    await dishButton.trigger('click')
+
+    expect(wrapper.find('[data-testid="full-page-loading"]').exists()).toBe(false)
+    expect(dishButton.attributes('aria-busy')).toBe('true')
+  })
+
   it('路由往返时保留同一份菜单状态', async () => {
     const { router } = await mountApp()
     const menuStore = useMenuStore()

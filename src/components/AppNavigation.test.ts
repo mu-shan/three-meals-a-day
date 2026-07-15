@@ -22,8 +22,9 @@ describe('底部导航', () => {
     expect(links[0].text()).toContain('今日菜单')
     expect(links[0].attributes('aria-current')).toBe('page')
     expect(links[1].text()).toContain('3')
-    expect(wrapper.find('[data-animal-icon="icon-map"]').exists()).toBe(true)
-    expect(wrapper.find('[data-animal-icon="icon-variant"]').exists()).toBe(true)
+    expect(wrapper.find('[data-icon="home"]').exists()).toBe(true)
+    expect(wrapper.find('[data-icon="heart"]').exists()).toBe(true)
+    expect(wrapper.find('[data-animal-icon]').exists()).toBe(false)
 
     await router.push('/preferences')
     await flushPromises()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Collapse, Divider, Icon, Title } from 'animal-island-vue'
+import { Collapse, Divider, Icon } from 'animal-island-vue'
 import { computed } from 'vue'
 import type { IngredientCategory, ShoppingListData } from '../types/menu'
 
@@ -22,7 +22,7 @@ const visibleCategories = computed(() => categories.filter((category) => props.l
       <Icon name="icon-shopping" :size="34" />
       <div>
         <p class="m-0 text-xs font-bold tracking-wide text-paper/75">照着买，不漏样</p>
-        <Title id="shopping-list-title" class="mt-1 block font-display text-2xl text-paper" size="middle" color="app-green">今日采购清单</Title>
+        <h2 id="shopping-list-title" class="mt-1 mb-0 font-display text-2xl text-paper">今日采购清单</h2>
       </div>
     </div>
 
