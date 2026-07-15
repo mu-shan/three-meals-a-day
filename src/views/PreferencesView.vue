@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Footer } from 'animal-island-vue'
-import { computed, ref } from 'vue'
+import { computed, nextTick, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import DataBackupPanel from '../components/DataBackupPanel.vue'
 import PreferenceDishList from '../components/PreferenceDishList.vue'
@@ -8,7 +8,16 @@ import { useMenuStore } from '../stores/menu'
 import { usePreferencesStore } from '../stores/preferences'
 import type { AppBackupV1 } from '../types/menu'
 
-const activeTab = ref<'liked' | 'disliked'>('liked')
+type PreferenceTab = 'liked' | 'disliked'
+
+const preferenceTabs = ['liked', 'disliked'] as const satisfies readonly PreferenceTab[]
+const activeTab = ref<PreferenceTab>('liked')
+const likedTabButton = ref<HTMLButtonElement | null>(null)
+const dislikedTabButton = ref<HTMLButtonElement | null>(null)
+const tabButtons = {
+  liked: likedTabButton,
+  disliked: dislikedTabButton,
+}
 const preferences = usePreferencesStore()
 const menuStore = useMenuStore()
 
@@ -18,12 +27,44 @@ const visibleDishes = computed(() =>
   activeTab.value === 'liked' ? preferences.likedDishes : preferences.dislikedDishes,
 )
 
-const tabClass = (tab: 'liked' | 'disliked') => [
+const tabClass = (tab: PreferenceTab) => [
   'min-h-11 rounded-xl border-2 px-2 text-xs font-bold transition-colors',
   activeTab.value === tab
     ? 'border-forest bg-forest text-white shadow-[0_4px_0_rgba(49,105,72,0.2)]'
     : 'border-line bg-paper-soft text-muted',
 ]
+
+const selectTab = (tab: PreferenceTab) => {
+  activeTab.value = tab
+}
+
+// 按标准标签页规则循环切换，并在视图更新后把焦点交给新标签。
+const onTabKeydown = async (event: KeyboardEvent, currentTab: PreferenceTab) => {
+  const currentIndex = preferenceTabs.indexOf(currentTab)
+  let targetTab: PreferenceTab
+
+  switch (event.key) {
+    case 'ArrowLeft':
+      targetTab = preferenceTabs[(currentIndex - 1 + preferenceTabs.length) % preferenceTabs.length]!
+      break
+    case 'ArrowRight':
+      targetTab = preferenceTabs[(currentIndex + 1) % preferenceTabs.length]!
+      break
+    case 'Home':
+      targetTab = preferenceTabs[0]
+      break
+    case 'End':
+      targetTab = preferenceTabs[preferenceTabs.length - 1]!
+      break
+    default:
+      return
+  }
+
+  event.preventDefault()
+  selectTab(targetTab)
+  await nextTick()
+  tabButtons[targetTab].value?.focus()
+}
 
 const cancelLike = (dishId: string) => {
   preferences.toggleLike(dishId)
@@ -78,32 +119,50 @@ const restoreBackup = (backup: AppBackupV1) => {
         <h2 id="preferences-book-title" class="mt-1 mb-0 font-display text-[2rem] font-normal text-ink">喜欢 / 不喜欢</h2>
       </div>
 
-      <div class="my-5 grid grid-cols-2 gap-2" aria-label="口味偏好分类">
+      <div class="my-5 grid grid-cols-2 gap-2" role="tablist" aria-label="口味偏好分类">
         <button
+          id="preferences-tab-liked"
+          ref="likedTabButton"
           data-testid="liked-tab"
+          role="tab"
           type="button"
-          :aria-pressed="activeTab === 'liked'"
+          aria-controls="preferences-panel-liked"
+          :aria-selected="activeTab === 'liked'"
+          :tabindex="activeTab === 'liked' ? 0 : -1"
           :class="tabClass('liked')"
-          @click="activeTab = 'liked'"
+          @click="selectTab('liked')"
+          @keydown="onTabKeydown($event, 'liked')"
         >
           喜欢的菜 <span class="ml-1 inline-grid size-5 place-items-center rounded-full bg-black/8 text-[10px]">{{ preferences.likedIds.length }}</span>
         </button>
         <button
+          id="preferences-tab-disliked"
+          ref="dislikedTabButton"
           data-testid="disliked-tab"
+          role="tab"
           type="button"
-          :aria-pressed="activeTab === 'disliked'"
+          aria-controls="preferences-panel-disliked"
+          :aria-selected="activeTab === 'disliked'"
+          :tabindex="activeTab === 'disliked' ? 0 : -1"
           :class="tabClass('disliked')"
-          @click="activeTab = 'disliked'"
+          @click="selectTab('disliked')"
+          @keydown="onTabKeydown($event, 'disliked')"
         >
           不喜欢的菜 <span class="ml-1 inline-grid size-5 place-items-center rounded-full bg-black/8 text-[10px]">{{ preferences.dislikedIds.length }}</span>
         </button>
       </div>
 
-      <PreferenceDishList
-        :dishes="visibleDishes"
-        :mode="activeTab"
-        @action="activeTab === 'liked' ? cancelLike($event) : restoreDish($event)"
-      />
+      <div
+        :id="`preferences-panel-${activeTab}`"
+        role="tabpanel"
+        :aria-labelledby="`preferences-tab-${activeTab}`"
+      >
+        <PreferenceDishList
+          :dishes="visibleDishes"
+          :mode="activeTab"
+          @action="activeTab === 'liked' ? cancelLike($event) : restoreDish($event)"
+        />
+      </div>
     </section>
 
     <DataBackupPanel

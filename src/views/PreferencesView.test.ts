@@ -8,8 +8,9 @@ import { useMenuStore } from '../stores/menu'
 import { usePreferencesStore } from '../stores/preferences'
 import PreferencesView from './PreferencesView.vue'
 
-const mountView = () =>
+const mountView = (attachTo?: Element) =>
   mount(PreferencesView, {
+    attachTo,
     global: {
       stubs: { RouterLink: { template: '<a><slot /></a>' } },
     },
@@ -44,6 +45,81 @@ describe('口味偏好页面', () => {
     expect(wrapper.text()).toContain('西红柿炒鸡蛋')
     await wrapper.get('[data-testid="restore-dish"]').trigger('click')
     expect(preferences.isDisliked('tomato-eggs')).toBe(false)
+  })
+
+  it('使用标准标签页语义关联当前口味列表', async () => {
+    const wrapper = mountView()
+    const tablist = wrapper.get('[role="tablist"]')
+    const likedTab = wrapper.get('[data-testid="liked-tab"]')
+    const dislikedTab = wrapper.get('[data-testid="disliked-tab"]')
+
+    expect(tablist.attributes('aria-label')).toBe('口味偏好分类')
+    expect(likedTab.attributes()).toMatchObject({
+      role: 'tab',
+      type: 'button',
+      id: 'preferences-tab-liked',
+      'aria-selected': 'true',
+      'aria-controls': 'preferences-panel-liked',
+      tabindex: '0',
+    })
+    expect(dislikedTab.attributes()).toMatchObject({
+      role: 'tab',
+      type: 'button',
+      id: 'preferences-tab-disliked',
+      'aria-selected': 'false',
+      'aria-controls': 'preferences-panel-disliked',
+      tabindex: '-1',
+    })
+
+    const likedPanel = wrapper.get('[role="tabpanel"]')
+    expect(likedPanel.attributes()).toMatchObject({
+      id: 'preferences-panel-liked',
+      'aria-labelledby': 'preferences-tab-liked',
+    })
+
+    await dislikedTab.trigger('click')
+
+    const dislikedPanel = wrapper.get('[role="tabpanel"]')
+    expect(dislikedPanel.attributes()).toMatchObject({
+      id: 'preferences-panel-disliked',
+      'aria-labelledby': 'preferences-tab-disliked',
+    })
+    expect(likedTab.attributes('aria-selected')).toBe('false')
+    expect(likedTab.attributes('tabindex')).toBe('-1')
+    expect(dislikedTab.attributes('aria-selected')).toBe('true')
+    expect(dislikedTab.attributes('tabindex')).toBe('0')
+  })
+
+  it('支持使用方向键和首尾键循环切换标签页', async () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const wrapper = mountView(host)
+    const likedTab = wrapper.get('[data-testid="liked-tab"]')
+    const dislikedTab = wrapper.get('[data-testid="disliked-tab"]')
+
+    likedTab.element.focus()
+    await likedTab.trigger('keydown', { key: 'ArrowRight' })
+    expect(dislikedTab.attributes('aria-selected')).toBe('true')
+    expect(document.activeElement).toBe(dislikedTab.element)
+
+    await dislikedTab.trigger('keydown', { key: 'ArrowRight' })
+    expect(likedTab.attributes('aria-selected')).toBe('true')
+    expect(document.activeElement).toBe(likedTab.element)
+
+    await likedTab.trigger('keydown', { key: 'ArrowLeft' })
+    expect(dislikedTab.attributes('aria-selected')).toBe('true')
+    expect(document.activeElement).toBe(dislikedTab.element)
+
+    await dislikedTab.trigger('keydown', { key: 'Home' })
+    expect(likedTab.attributes('aria-selected')).toBe('true')
+    expect(document.activeElement).toBe(likedTab.element)
+
+    await likedTab.trigger('keydown', { key: 'End' })
+    expect(dislikedTab.attributes('aria-selected')).toBe('true')
+    expect(document.activeElement).toBe(dislikedTab.element)
+
+    wrapper.unmount()
+    host.remove()
   })
 
   it('解析备份后预览并确认恢复', async () => {
