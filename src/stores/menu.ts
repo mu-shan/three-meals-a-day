@@ -19,6 +19,12 @@ import { usePreferencesStore } from './preferences'
 
 type MenuStorage = Pick<Storage, 'getItem' | 'setItem'>
 
+export type ShuffleTarget =
+  | { scope: 'all' }
+  | { scope: 'meal'; mealType: MealType }
+  | { scope: 'dish'; mealType: MealType; dishId: string }
+  | null
+
 const emptyShoppingList = (): ShoppingListData => ({
   vegetables: [],
   protein: [],
@@ -29,7 +35,8 @@ const emptyShoppingList = (): ShoppingListData => ({
 export const useMenuStore = defineStore('menu', () => {
   const menu = ref<DailyMenu | null>(null)
   const today = ref('')
-  const isShuffling = ref(false)
+  const shuffleTarget = ref<ShuffleTarget>(null)
+  const isShuffling = computed(() => shuffleTarget.value !== null)
   const feedback = ref('')
   const initialized = ref(false)
   let storage: MenuStorage | null = null
@@ -100,49 +107,62 @@ export const useMenuStore = defineStore('menu', () => {
     if (!initialized.value || nextDate !== today.value) initialize(date, storage ?? window.localStorage)
   }
 
-  const shuffle = (createMenu: () => DailyMenu) => {
+  // 换菜目标既驱动局部加载态，也作为所有换菜操作的串行锁。
+  const shuffle = (
+    target: Exclude<ShuffleTarget, null>,
+    createMenu: () => DailyMenu,
+  ) => {
     refreshDate()
-    if (isShuffling.value) return false
+    if (shuffleTarget.value) return false
 
-    isShuffling.value = true
+    shuffleTarget.value = target
     window.setTimeout(() => {
       try {
         persist(createMenu())
       } catch {
         notify('当前偏好下没有足够候选，请恢复一些不喜欢的菜')
       } finally {
-        isShuffling.value = false
+        shuffleTarget.value = null
       }
     }, 420)
     return true
   }
 
   const generateAll = () =>
-    shuffle(() => generateDailyMenu(today.value, preferences.rules))
+    shuffle(
+      { scope: 'all' },
+      () => generateDailyMenu(today.value, preferences.rules),
+    )
 
   const rerollMeal = (type: MealType) =>
-    shuffle(() => {
-      const currentMenu = menu.value!
-      const otherIds = new Set(
-        (['breakfast', 'lunch', 'dinner'] as MealType[])
-          .filter((mealType) => mealType !== type)
-          .flatMap((mealType) => currentMenu[mealType].dishes.map((dish) => dish.id)),
-      )
-      const nextMeal =
-        type === 'breakfast'
-          ? generateBreakfast(otherIds, preferences.rules)
-          : type === 'lunch'
-            ? generateLunch({ excludedIds: otherIds, preferences: preferences.rules })
-            : generateDinner(otherIds, preferences.rules)
+    shuffle(
+      { scope: 'meal', mealType: type },
+      () => {
+        const currentMenu = menu.value!
+        const otherIds = new Set(
+          (['breakfast', 'lunch', 'dinner'] as MealType[])
+            .filter((mealType) => mealType !== type)
+            .flatMap((mealType) => currentMenu[mealType].dishes.map((dish) => dish.id)),
+        )
+        const nextMeal =
+          type === 'breakfast'
+            ? generateBreakfast(otherIds, preferences.rules)
+            : type === 'lunch'
+              ? generateLunch({ excludedIds: otherIds, preferences: preferences.rules })
+              : generateDinner(otherIds, preferences.rules)
 
-      return { ...currentMenu, [type]: nextMeal }
-    })
+        return { ...currentMenu, [type]: nextMeal }
+      },
+    )
 
   const rerollDish = (type: MealType, dishId: string) =>
-    shuffle(() => ({
-      ...menu.value!,
-      [type]: replaceDish(menu.value![type], dishId, preferences.rules),
-    }))
+    shuffle(
+      { scope: 'dish', mealType: type, dishId },
+      () => ({
+        ...menu.value!,
+        [type]: replaceDish(menu.value![type], dishId, preferences.rules),
+      }),
+    )
 
   const toggleLike = (dishId: string) => {
     const wasLiked = preferences.isLiked(dishId)
@@ -152,7 +172,7 @@ export const useMenuStore = defineStore('menu', () => {
 
   const dislikeDish = (type: MealType, dishId: string) => {
     refreshDate()
-    if (isShuffling.value) return false
+    if (shuffleTarget.value) return false
 
     const nextRules = {
       likedIds: new Set([...preferences.rules.likedIds].filter((id) => id !== dishId)),
@@ -167,7 +187,10 @@ export const useMenuStore = defineStore('menu', () => {
 
     preferences.dislike(dishId)
     notify('已记入不喜欢，并为你换了一道')
-    return shuffle(() => ({ ...menu.value!, [type]: nextMeal }))
+    return shuffle(
+      { scope: 'dish', mealType: type, dishId },
+      () => ({ ...menu.value!, [type]: nextMeal }),
+    )
   }
 
   const replaceImportedMenu = (nextMenu: DailyMenu) => {
@@ -203,6 +226,7 @@ export const useMenuStore = defineStore('menu', () => {
   return {
     menu,
     today,
+    shuffleTarget,
     isShuffling,
     feedback,
     initialized,
