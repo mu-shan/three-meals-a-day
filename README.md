@@ -37,7 +37,6 @@ pnpm dev
 ## 验证
 
 ```bash
-pnpm test
 pnpm typecheck
 pnpm build
 ```
