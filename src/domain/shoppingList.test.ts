@@ -29,18 +29,38 @@ describe('采购清单', () => {
   it('合并同名食材并按分类汇总', () => {
     const result = buildShoppingList(menuFixture)
 
-    expect(result.vegetables).toEqual(expect.arrayContaining(['西红柿', '辣椒', '菠菜']))
-    expect(result.protein).toEqual(expect.arrayContaining(['鸡蛋', '牛奶', '猪肉']))
-    expect(result.protein.filter((name) => name === '鸡蛋')).toHaveLength(1)
-    expect(result.staples.filter((name) => name === '大米')).toHaveLength(1)
-    expect(result.fruit).toEqual(['香蕉'])
+    expect(result.vegetables.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['西红柿', '辣椒', '菠菜']),
+    )
+    expect(result.protein.map((item) => item.name)).toEqual(
+      expect.arrayContaining(['鸡蛋', '牛奶', '猪肉']),
+    )
+    expect(result.protein.filter((item) => item.name === '鸡蛋')).toHaveLength(1)
+    expect(result.staples.filter((item) => item.name === '大米')).toHaveLength(1)
+    expect(result.fruit).toEqual([{ name: '香蕉', mealTypes: ['breakfast'] }])
+  })
+
+  it('同名食材保留所有使用它的餐次来源', () => {
+    const result = buildShoppingList(menuFixture)
+
+    expect(result.protein.find((item) => item.name === '鸡蛋')?.mealTypes).toEqual([
+      'breakfast',
+      'lunch',
+      'dinner',
+    ])
+    expect(result.staples.find((item) => item.name === '大米')?.mealTypes).toEqual([
+      'lunch',
+      'dinner',
+    ])
   })
 
   it('每个分类按中文名称排序以保持展示稳定', () => {
     const result = buildShoppingList(menuFixture)
 
-    expect(result.vegetables).toEqual(
-      [...result.vegetables].sort((left, right) => left.localeCompare(right, 'zh-CN')),
+    expect(result.vegetables.map((item) => item.name)).toEqual(
+      result.vegetables
+        .map((item) => item.name)
+        .sort((left, right) => left.localeCompare(right, 'zh-CN')),
     )
   })
 })

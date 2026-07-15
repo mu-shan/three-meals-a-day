@@ -2,6 +2,7 @@
 
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { dishes } from '../data/dishes'
 import { generateDailyMenu } from '../domain/menuGenerator'
 import { saveTodayMenu } from '../services/todayMenuStorage'
 import { useMenuStore } from './menu'
@@ -38,26 +39,82 @@ describe('当天菜单 store', () => {
 
     expect(store.dislikeDish('breakfast', target.id)).toBe(true)
     expect(preferences.isDisliked(target.id)).toBe(true)
+    expect(store.shuffleTarget).toEqual({
+      scope: 'dish',
+      mealType: 'breakfast',
+      dishId: target.id,
+    })
     expect(store.isShuffling).toBe(true)
 
     await vi.advanceTimersByTimeAsync(420)
 
     expect(store.menu!.breakfast.dishes.some((dish) => dish.id === target.id)).toBe(false)
+    expect(store.shuffleTarget).toBeNull()
     expect(store.isShuffling).toBe(false)
   })
 
-  it('换菜期间拒绝重复操作并在完成后恢复', async () => {
+  it('重新生成整天菜单时标记全部范围并在完成后清空', async () => {
     const store = useMenuStore()
     store.initialize(testDate)
-    const target = store.menu!.lunch.dishes[0]
 
-    expect(store.rerollDish('lunch', target.id)).toBe(true)
+    expect(store.generateAll()).toBe(true)
+    expect(store.shuffleTarget).toEqual({ scope: 'all' })
+    expect(store.isShuffling).toBe(true)
+
+    await vi.advanceTimersByTimeAsync(420)
+
+    expect(store.shuffleTarget).toBeNull()
+    expect(store.isShuffling).toBe(false)
+  })
+
+  it('重抽一餐时标记对应餐次并在完成后清空', async () => {
+    const store = useMenuStore()
+    store.initialize(testDate)
+
+    expect(store.rerollMeal('lunch')).toBe(true)
+    expect(store.shuffleTarget).toEqual({ scope: 'meal', mealType: 'lunch' })
+
+    await vi.advanceTimersByTimeAsync(420)
+
+    expect(store.shuffleTarget).toBeNull()
+    expect(store.isShuffling).toBe(false)
+  })
+
+  it('重抽一道菜时标记对应菜品并在完成后清空', async () => {
+    const store = useMenuStore()
+    store.initialize(testDate)
+    const target = store.menu!.dinner.dishes[0]
+
+    expect(store.rerollDish('dinner', target.id)).toBe(true)
+    expect(store.shuffleTarget).toEqual({
+      scope: 'dish',
+      mealType: 'dinner',
+      dishId: target.id,
+    })
     expect(store.generateAll()).toBe(false)
 
     await vi.advanceTimersByTimeAsync(420)
 
+    expect(store.shuffleTarget).toBeNull()
     expect(store.isShuffling).toBe(false)
+  })
+
+  it('生成菜单失败后清空换菜目标并恢复可操作状态', async () => {
+    const store = useMenuStore()
+    store.initialize(testDate)
+    usePreferencesStore().replacePreferences({
+      likedIds: [],
+      dislikedIds: dishes.map((dish) => dish.id),
+    })
+
     expect(store.generateAll()).toBe(true)
+    expect(store.shuffleTarget).toEqual({ scope: 'all' })
+
+    await vi.advanceTimersByTimeAsync(420)
+
+    expect(store.shuffleTarget).toBeNull()
+    expect(store.isShuffling).toBe(false)
+    expect(store.feedback).toContain('没有足够候选')
   })
 
   it('偏好导致菜单无解时恢复候选并保持应用可用', () => {

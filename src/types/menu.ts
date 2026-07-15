@@ -53,4 +53,9 @@ export type BackupParseResult =
   | { ok: true; backup: AppBackupV1 }
   | { ok: false; error: string }
 
-export type ShoppingListData = Record<IngredientCategory, string[]>
+export interface ShoppingListItem {
+  name: string
+  mealTypes: MealType[]
+}
+
+export type ShoppingListData = Record<IngredientCategory, ShoppingListItem[]>

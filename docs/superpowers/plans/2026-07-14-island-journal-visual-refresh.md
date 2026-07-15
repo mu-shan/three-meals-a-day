@@ -6,7 +6,9 @@
 
 **Architecture:** 保持 Router、Pinia、菜单生成和本地存储结构不变。新增纯函数时间阶段模块、`MealProgress` 和 `HomeHeader` 两个聚焦组件；现有菜单、采购清单和偏好页面改用组件库提供的容器与交互组件；将超大的主题样式拆分为基础、首页、偏好页和导航四个文件。
 
-**Tech Stack:** Vue 3、TypeScript、Pinia、Vue Router、Vitest、Vue Test Utils、animal-island-vue 0.2.1、CSS
+**Tech Stack:** Vue 3、TypeScript、Pinia、Vue Router、Vitest、Vue Test Utils、animal-island-vue 0.2.1、Tailwind CSS 4
+
+> **执行调整（2026-07-14）：** 用户要求视觉系统改用 Tailwind CSS 4 实现。`@tailwindcss/vite` 负责 Vite 集成，`src/styles/theme.css` 仅保留 `@theme` 设计令牌、基础可访问性规则和对组件库内部结构的必要覆盖；页面、卡片、导航和状态样式均使用模板中的 Tailwind utility class，不再拆分 `base.css`、`home.css`、`preferences.css` 和 `navigation.css`。
 
 ---
 
