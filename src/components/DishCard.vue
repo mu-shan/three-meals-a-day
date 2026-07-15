@@ -68,7 +68,9 @@ const onImageError = () => {
     </div>
 
     <div class="min-w-0 flex-1 pb-11">
-      <h3 class="m-0 truncate pr-24 font-display text-lg leading-6 text-ink">
+      <h3
+        class="m-0 truncate pr-24 font-display text-lg leading-6 text-ink max-[380px]:pt-12 max-[380px]:pr-0"
+      >
         {{ dish.name }}
       </h3>
       <p class="mt-1 mb-0 line-clamp-2 text-xs leading-5 text-muted">

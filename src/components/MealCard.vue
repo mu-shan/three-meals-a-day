@@ -34,19 +34,24 @@ const mealMeta = {
 </script>
 
 <template>
-  <section class="rounded-2xl border border-line/75 bg-paper/95 p-3 shadow-paper sm:p-4">
+  <section
+    class="rounded-2xl border border-line/75 bg-paper/95 p-3 shadow-paper sm:p-4"
+    :aria-labelledby="`meal-${meal.type}-title`"
+  >
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <p class="m-0 text-xs font-bold tracking-wide text-muted">
           {{ mealMeta[props.meal.type].kicker }} · {{ mealMeta[props.meal.type].time }}
         </p>
-        <Title
-          class="mt-1 block font-display text-2xl text-ink"
-          size="middle"
-          :color="mealMeta[props.meal.type].color"
-        >
-          {{ mealMeta[props.meal.type].title }}
-        </Title>
+        <h3 :id="`meal-${meal.type}-title`" class="m-0">
+          <Title
+            class="mt-1 block font-display text-2xl text-ink"
+            size="middle"
+            :color="mealMeta[props.meal.type].color"
+          >
+            {{ mealMeta[props.meal.type].title }}
+          </Title>
+        </h3>
       </div>
 
       <Button

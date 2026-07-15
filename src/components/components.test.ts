@@ -14,21 +14,21 @@ describe('家庭菜单组件', () => {
       role: 'baby',
       cardClass: 'border-baby',
       imageClass: 'bg-baby-soft',
-      badgeClass: 'bg-baby',
+      badgeClass: 'bg-baby-deep',
     },
     {
       dishId: 'pepper-pork',
       role: 'spicy',
       cardClass: 'border-spicy',
       imageClass: 'bg-spicy-soft',
-      badgeClass: 'bg-spicy',
+      badgeClass: 'bg-spicy-deep',
     },
     {
       dishId: 'steamed-seabass',
       role: 'shared',
       cardClass: 'border-shared',
       imageClass: 'bg-shared-soft',
-      badgeClass: 'bg-shared',
+      badgeClass: 'bg-shared-deep',
     },
   ])('菜品卡按 $role 角色展示纸张配色', ({ dishId, role, cardClass, imageClass, badgeClass }) => {
     const dish = dishes.find((item) => item.id === dishId)!
@@ -40,7 +40,16 @@ describe('家庭菜单组件', () => {
     expect(wrapper.get('[data-testid="role-label"]').classes()).toContain(badgeClass)
   })
 
-  it('菜品卡展示偏好图形与换菜加载状态', async () => {
+  it('菜品卡在窄屏把菜名移到偏好按钮下方', () => {
+    const dish = dishes.find((item) => item.id === 'tomato-eggs')!
+    const wrapper = mount(DishCard, { props: { dish } })
+
+    expect(wrapper.get('h3').classes()).toEqual(
+      expect.arrayContaining(['pr-24', 'max-[380px]:pt-12', 'max-[380px]:pr-0']),
+    )
+  })
+
+  it('菜品卡展示偏好图形与换菜加载状态', () => {
     const dish = dishes.find((item) => item.id === 'pepper-pork')!
     const wrapper = mount(DishCard, { props: { dish, liked: true, loading: true } })
 
@@ -75,10 +84,16 @@ describe('家庭菜单组件', () => {
     const title = wrapper.get('[data-animal-component="title"]')
     expect(title.attributes('size')).toBe('middle')
     expect(title.attributes('color')).toBe(color)
+    const headingId = `meal-${type}-title`
+    expect(wrapper.get('section').attributes('aria-labelledby')).toBe(headingId)
+    expect(wrapper.get(`#${headingId}`).element.tagName).toBe('H3')
+    expect(wrapper.get(`#${headingId}`).find('[data-animal-component="title"]').exists()).toBe(
+      true,
+    )
     expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(true)
   })
 
-  it('餐次卡展示菜品、标记局部加载并向上转发事件', async () => {
+  it('餐次卡在启用状态通过真实点击向上转发事件', async () => {
     const meal = {
       type: 'lunch' as const,
       dishes: [dishes.find((item) => item.id === 'steamed-rice')!],
@@ -87,28 +102,82 @@ describe('家庭菜单组件', () => {
       props: {
         meal,
         likedIds: new Set(['steamed-rice']),
-        loading: true,
-        shufflingDishId: 'steamed-rice',
       },
     })
 
-    expect(wrapper.text()).toContain('午餐')
-    expect(wrapper.text()).toContain('香喷喷米饭')
-    expect(wrapper.find('[data-animal-component="title"]').exists()).toBe(true)
-    expect(wrapper.find('[data-animal-component="divider"]').exists()).toBe(true)
-    expect(wrapper.get('[data-testid="reroll-meal"]').attributes('aria-busy')).toBe('true')
-    expect(wrapper.get('[data-testid="replace-dish"]').attributes('aria-busy')).toBe('true')
-
-    wrapper.getComponent('[data-testid="reroll-meal"]').vm.$emit('click')
-    const dishCard = wrapper.getComponent(DishCard)
-    dishCard.vm.$emit('replace', 'steamed-rice')
-    dishCard.vm.$emit('like', 'steamed-rice')
-    dishCard.vm.$emit('dislike', 'steamed-rice')
+    await wrapper.get('[data-testid="reroll-meal"]').trigger('click')
+    await wrapper.get('[data-testid="replace-dish"]').trigger('click')
+    await wrapper.get('[data-testid="like-dish"]').trigger('click')
+    await wrapper.get('[data-testid="dislike-dish"]').trigger('click')
 
     expect(wrapper.emitted('reroll')).toHaveLength(1)
     expect(wrapper.emitted('replace')).toEqual([['steamed-rice']])
     expect(wrapper.emitted('like')).toEqual([['steamed-rice']])
     expect(wrapper.emitted('dislike')).toEqual([['steamed-rice']])
+  })
+
+  it('餐次换新时只标记换一餐按钮为忙碌', () => {
+    const wrapper = mount(MealCard, {
+      props: {
+        meal: {
+          type: 'lunch',
+          dishes: [
+            dishes.find((item) => item.id === 'steamed-rice')!,
+            dishes.find((item) => item.id === 'pepper-pork')!,
+          ],
+        },
+        loading: true,
+      },
+    })
+
+    expect(wrapper.get('[data-testid="reroll-meal"]').attributes('aria-busy')).toBe('true')
+    expect(
+      wrapper
+        .findAll('[data-testid="replace-dish"]')
+        .map((button) => button.attributes('aria-busy')),
+    ).toEqual(['false', 'false'])
+  })
+
+  it('单道换新时只标记目标菜品按钮为忙碌', () => {
+    const wrapper = mount(MealCard, {
+      props: {
+        meal: {
+          type: 'lunch',
+          dishes: [
+            dishes.find((item) => item.id === 'steamed-rice')!,
+            dishes.find((item) => item.id === 'pepper-pork')!,
+          ],
+        },
+        shufflingDishId: 'steamed-rice',
+      },
+    })
+
+    expect(wrapper.get('[data-testid="reroll-meal"]').attributes('aria-busy')).toBe('false')
+    expect(
+      wrapper
+        .findAll('[data-testid="replace-dish"]')
+        .map((button) => button.attributes('aria-busy')),
+    ).toEqual(['true', 'false'])
+  })
+
+  it('餐次禁用时所有操作按钮都不可点击', () => {
+    const wrapper = mount(MealCard, {
+      props: {
+        meal: {
+          type: 'lunch',
+          dishes: [
+            dishes.find((item) => item.id === 'steamed-rice')!,
+            dishes.find((item) => item.id === 'pepper-pork')!,
+          ],
+        },
+        disabled: true,
+      },
+    })
+
+    expect(wrapper.findAll('button')).toHaveLength(7)
+    expect(
+      wrapper.findAll('button').every((button) => (button.element as HTMLButtonElement).disabled),
+    ).toBe(true)
   })
 
   it('采购清单只渲染有内容的分类', () => {

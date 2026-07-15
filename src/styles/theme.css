@@ -11,10 +11,13 @@
   --color-muted: #796654;
   --color-line: #cdbd95;
   --color-baby: #d7ad38;
+  --color-baby-deep: #795300;
   --color-baby-soft: #fff1b8;
   --color-spicy: #c85b4a;
+  --color-spicy-deep: #8f3429;
   --color-spicy-soft: #f8d0c8;
   --color-shared: #6f9b68;
+  --color-shared-deep: #3f663b;
   --color-shared-soft: #dcebd4;
   --font-display: 'STSong', 'Songti SC', 'Noto Serif CJK SC', serif;
   --font-sans: 'PingFang SC', 'Noto Sans CJK SC', sans-serif;
